@@ -3,6 +3,7 @@
     <input v-model="type" placeholder="Art des Workouts" required />
     <input type="number" v-model="duration" placeholder="Dauer (Minuten)" required />
     <input type="date" v-model="date" required />
+    <textarea v-model="notes" placeholder="Notizen (optional)"></textarea>
     <button type="submit">Hinzufügen</button>
   </form>
 </template>
