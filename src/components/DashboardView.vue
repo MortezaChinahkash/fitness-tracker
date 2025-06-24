@@ -217,17 +217,44 @@ function getDaysAgo(dateString: string): string {
 <style scoped>
 .dashboard-container {
   display: grid;
-  gap: 2rem;
+  gap: 1.5rem;
+  max-width: 100%;
 }
 
-/* Quick Stats */
-.quick-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+/* Welcome Card */
+.welcome-card {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.1));
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.quick-stat-card {
+.welcome-content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.welcome-content p {
+  margin: 0;
+  color: #86868b;
+  font-size: 1.1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.welcome-icon {
+  font-size: 3rem;
+  opacity: 0.8;
+}
+
+/* Today's Focus */
+.today-focus {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   border-radius: 16px;
@@ -236,77 +263,35 @@ function getDaysAgo(dateString: string): string {
   box-shadow: 
     0 1px 3px rgba(0, 0, 0, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.24);
-  text-align: center;
-  transition: all 0.2s ease;
 }
 
-.quick-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.stat-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.stat-number {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1d1d1f;
-  line-height: 1;
-  margin-bottom: 0.25rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-/* Motivation Card */
-.motivation-card {
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid rgba(0, 122, 255, 0.2);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.motivation-header {
+.focus-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.motivation-icon {
-  font-size: 3rem;
+.focus-icon {
+  font-size: 2.5rem;
 }
 
-.motivation-content h3 {
+.focus-content h3 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #1d1d1f;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-.motivation-content p {
+.focus-content p {
   margin: 0;
   color: #86868b;
   font-size: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-.motivation-btn {
+.start-workout-btn {
   background: #007AFF;
   color: white;
   border: none;
@@ -319,20 +304,115 @@ function getDaysAgo(dateString: string): string {
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
+  width: 100%;
+  justify-content: center;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-.motivation-btn:hover {
+.start-workout-btn:hover {
   background: #0056b3;
   transform: translateY(-1px);
 }
 
-/* Section Titles */
+/* Achievement Card */
+.achievement-card {
+  background: linear-gradient(135deg, rgba(52, 199, 89, 0.1), rgba(48, 209, 88, 0.1));
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.achievement-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.achievement-icon {
+  font-size: 2.5rem;
+}
+
+.achievement-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.achievement-content p {
+  margin: 0;
+  color: #86868b;
+  font-size: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+/* Quick Overview */
+.quick-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.overview-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.overview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.overview-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.overview-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.overview-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #86868b;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+/* Latest Activity */
+.latest-activity {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
 .section-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1d1d1f;
   margin: 0 0 1rem 0;
@@ -340,182 +420,20 @@ function getDaysAgo(dateString: string): string {
 }
 
 .section-icon {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
-/* Recent Activities */
-.recent-activities {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.recent-item {
+.activity-card {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.75rem;
-  background: #f5f5f7;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.recent-emoji {
-  font-size: 1.25rem;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.recent-content {
-  flex: 1;
-}
-
-.recent-content h4 {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1d1d1f;
-  text-transform: capitalize;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.recent-content p {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.recent-badge {
-  background: #007AFF;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.view-all-btn {
-  background: transparent;
-  border: 1px solid #007AFF;
-  color: #007AFF;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.view-all-btn:hover {
-  background: #007AFF;
-  color: white;
-}
-
-/* Quick Actions */
-.quick-actions {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.action-card {
-  background: #f5f5f7;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.action-card:hover {
-  background: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.action-icon {
-  font-size: 1.5rem;
-}
-
-.action-content h4 {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-.action-content p {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #86868b;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-/* Weekly Goal */
-.weekly-goal {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.goal-card {
   padding: 1rem;
   background: #f5f5f7;
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.goal-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.goal-icon {
+.activity-emoji {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -523,27 +441,79 @@ function getDaysAgo(dateString: string): string {
   align-items: center;
   justify-content: center;
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.goal-info h4 {
+.activity-content {
+  flex: 1;
+}
+
+.activity-content h4 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   font-weight: 600;
   color: #1d1d1f;
+  text-transform: capitalize;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-.goal-info p {
+.activity-content p {
   margin: 0;
   font-size: 0.85rem;
   color: #86868b;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-.goal-progress {
-  margin-top: 1rem;
+.view-more-btn {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.view-more-btn:hover {
+  background: #0056b3;
+}
+
+/* Weekly Progress */
+.weekly-progress {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progress-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.progress-percentage {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #007AFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .progress-bar {
@@ -551,7 +521,7 @@ function getDaysAgo(dateString: string): string {
   background: #e5e5ea;
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .progress-fill {
@@ -561,25 +531,89 @@ function getDaysAgo(dateString: string): string {
   transition: width 0.3s ease;
 }
 
-.progress-text {
-  font-size: 0.8rem;
+.progress-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
   color: #86868b;
   text-align: center;
-  display: block;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+/* Dashboard Actions */
+.dashboard-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.action-primary {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.action-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.action-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #007AFF;
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.action-secondary:hover {
+  background: #007AFF;
+  color: white;
+  transform: translateY(-1px);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .quick-stats {
-    grid-template-columns: repeat(3, 1fr);
+  .dashboard-container {
+    gap: 1.25rem;
   }
   
-  .actions-grid {
+  .welcome-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .quick-overview {
     grid-template-columns: 1fr;
   }
   
-  .motivation-header {
+  .dashboard-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .focus-header,
+  .achievement-content {
     flex-direction: column;
     text-align: center;
   }
@@ -587,18 +621,18 @@ function getDaysAgo(dateString: string): string {
 
 @media (max-width: 480px) {
   .dashboard-container {
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
-  .quick-stats {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  .welcome-card,
+  .today-focus,
+  .achievement-card,
+  .latest-activity,
+  .weekly-progress {
+    padding: 1.25rem;
   }
   
-  .motivation-card,
-  .recent-activities,
-  .quick-actions,
-  .weekly-goal {
+  .overview-card {
     padding: 1.25rem;
   }
 }

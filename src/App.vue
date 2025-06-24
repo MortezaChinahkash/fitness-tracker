@@ -6,6 +6,7 @@ import Statistics from './components/Statistics.vue'
 import WorkoutList from './components/WorkoutList.vue'
 import EmptyState from './components/EmptyState.vue'
 import ProfileView from './components/ProfileView.vue'
+import DashboardView from './components/DashboardView.vue'
 
 const totalDuration = computed(() =>
   workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
@@ -26,6 +27,9 @@ const workouts = ref<Workout[]>([])
 // Navigation State
 const currentView = ref('dashboard')
 
+// Modal State
+const showAddWorkout = ref(false)
+
 function navigateToView(view: string) {
   currentView.value = view
 }
@@ -33,6 +37,11 @@ function navigateToView(view: string) {
 // Funktion, um ein Workout hinzuzufügen
 function addWorkout(workout: Workout) {
   workouts.value.push(workout)
+}
+
+function addWorkoutAndClose(workout: Workout) {
+  addWorkout(workout)
+  showAddWorkout.value = false
 }
 
 function deleteWorkout(index: number) {
@@ -92,28 +101,21 @@ function formatDate(dateString: string): string {
 
       <!-- Dashboard View -->
       <div v-if="currentView === 'dashboard'" class="content-section">
-        <AddWorkout @add="addWorkout" />
-        
-        <Statistics 
+        <DashboardView 
           :workoutCount="workoutCount"
           :totalDuration="totalDuration"
-          :averageDuration="averageDuration"
           :workouts="workouts"
+          @showAddWorkout="showAddWorkout = true"
+          @navigateToWorkouts="navigateToView('workouts')"
+          @navigateToStatistics="navigateToView('statistics')"
+          @navigateToProfile="navigateToView('profile')"
         />
-
-        <div v-if="workouts.length > 0" class="recent-workouts">
-          <h2 class="section-title">
-            <span class="section-icon">⏱️</span>
-            Letzte Aktivitäten
-          </h2>
-          <div class="recent-list">
-            <div v-for="(workout, index) in workouts.slice(-3)" :key="index" class="recent-item">
-              <span class="recent-emoji">{{ getWorkoutEmoji(workout.type) }}</span>
-              <div class="recent-content">
-                <h4>{{ workout.type }}</h4>
-                <p>{{ workout.duration }} Minuten • {{ formatDate(workout.date) }}</p>
-              </div>
-            </div>
+        
+        <!-- Add Workout Modal/Dialog -->
+        <div v-if="showAddWorkout" class="modal-overlay" @click="showAddWorkout = false">
+          <div class="modal-content" @click.stop>
+            <AddWorkout @add="addWorkoutAndClose" />
+            <button class="modal-close" @click="showAddWorkout = false">×</button>
           </div>
         </div>
       </div>
@@ -327,6 +329,58 @@ function formatDate(dateString: string): string {
   .section-title {
     font-size: 1.5rem;
   }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.2),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #86868b;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #1d1d1f;
 }
 
 /* Apple-style Typography */
