@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import AddWorkout from './components/AddWorkout.vue'
+import AppHeader from './components/AppHeader.vue'
+import AppFooter from './components/AppFooter.vue'
 
 const totalDuration = computed(() =>
   workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
@@ -83,15 +85,17 @@ function formatDate(dateString: string): string {
 
 <template>
   <div class="app-container">
-    <header class="app-header">
-      <h1 class="app-title">
-        <span class="app-icon">🏋️‍♂️</span>
-        Fitness-Tracker
-        <span class="app-subtitle">Deine persönliche Trainings-App</span>
-      </h1>
-    </header>
-
+    <AppHeader />
+    
     <main class="app-main">
+      <div class="hero-section">
+        <h1 class="app-title">
+          <span class="app-icon">🏋️‍♂️</span>
+          Fitness-Tracker
+          <span class="app-subtitle">Deine persönliche Trainings-App</span>
+        </h1>
+      </div>
+
       <AddWorkout @add="addWorkout" />
 
       <div class="content-section">
@@ -201,6 +205,8 @@ function formatDate(dateString: string): string {
         </div>
       </div>
     </main>
+    
+    <AppFooter :workoutCount="workoutCount" />
   </div>
 </template>
 
