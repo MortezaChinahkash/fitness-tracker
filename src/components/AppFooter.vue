@@ -61,7 +61,7 @@
         </div>
       </div>
       
-      <!-- Footer Bottom */
+      
       <div class="footer-bottom">
         <div class="footer-bottom-content">
           <div class="footer-info">
@@ -90,7 +90,6 @@
       </div>
     </div>
   </footer>
-</template>
 </template>
 
 <script setup lang="ts">

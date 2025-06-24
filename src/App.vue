@@ -220,16 +220,16 @@ function formatDate(dateString: string): string {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   color: #1d1d1f;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header im Apple Stil */
-.app-header {
-  position: relative;
+/* Hero Section */
+.hero-section {
   text-align: center;
-  padding: 3rem 2rem 2rem;
-  background: rgba(255, 255, 255, 0.8);
+  padding: 3rem 2rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .app-title {

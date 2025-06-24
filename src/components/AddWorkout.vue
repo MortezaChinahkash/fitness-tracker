@@ -2,7 +2,6 @@
   <div class="workout-form-container">
     <div class="form-header">
       <h2 class="form-title">
-        <span class="icon">💪</span>
         Neues Workout hinzufügen
       </h2>
       <p class="form-subtitle">Zeichne dein Training auf und verfolge deine Fortschritte</p>
