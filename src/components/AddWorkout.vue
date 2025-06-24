@@ -20,16 +20,18 @@ const date = ref('')
 const emit = defineEmits(['add'])
 
 function addWorkout() {
-  // An die Haupt-App schicken:
   emit('add', {
     type: type.value,
     duration: duration.value,
-    date: date.value
-  })
+    date: date.value,
+    notes: notes.value
+  });
 
-  // Felder zurücksetzen
-  type.value = ''
-  duration.value = 0
-  date.value = ''
+  type.value = '';
+  duration.value = 0;
+  date.value = '';
+  notes.value = '';
 }
 </script>
+
+
