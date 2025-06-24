@@ -110,34 +110,17 @@ function addWorkout() {
 
 <style scoped>
 .workout-form-container {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
+  max-width: 600px;
+  margin: 0 auto;
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  overflow: hidden;
 }
 
-.workout-form-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 106, 106, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(238, 90, 36, 0.3) 0%, transparent 50%);
-  pointer-events: none;
-}
+/* Entferne die Hintergrund-Overlays */
 
 .form-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   z-index: 10;
   position: relative;
 }
