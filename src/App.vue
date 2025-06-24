@@ -207,43 +207,31 @@ function formatDate(dateString: string): string {
 
 
 <style scoped>
-/* Globale Container-Styles */
+/* Apple Design System - Minimalistische Eleganz */
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  color: #1d1d1f;
   position: relative;
-  overflow-x: hidden;
 }
 
-.app-container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 106, 106, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(238, 90, 36, 0.3) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Header */
+/* Header im Apple Stil */
 .app-header {
   position: relative;
-  z-index: 10;
   text-align: center;
-  padding: 2rem 2rem 1rem;
+  padding: 3rem 2rem 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .app-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: white;
+  font-size: 3rem;
+  font-weight: 600;
+  color: #1d1d1f;
   margin: 0;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,15 +239,16 @@ function formatDate(dateString: string): string {
 }
 
 .app-icon {
-  font-size: 3.5rem;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
 }
 
 .app-subtitle {
-  font-size: 1rem;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.8);
-  letter-spacing: 0.5px;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #86868b;
+  letter-spacing: -0.01em;
+  margin-top: 0.5rem;
 }
 
 /* Main Content */
@@ -269,129 +258,126 @@ function formatDate(dateString: string): string {
 }
 
 .content-section {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
   display: grid;
-  gap: 2rem;
+  gap: 3rem;
 }
 
-/* Section Titles */
+/* Section Titles im Apple Stil */
 .section-title {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 1.5rem 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  gap: 0.75rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 2rem 0;
+  letter-spacing: -0.02em;
 }
 
 .section-icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+  font-size: 2rem;
 }
 
-/* Statistik Cards */
+/* Statistik Cards - Apple Card Design */
 .stats-container {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  border-radius: 18px;
+  padding: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) calc(0.1s * var(--delay, 0)) both;
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
 }
 
-.stat-card:nth-child(1) { --delay: 1; }
-.stat-card:nth-child(2) { --delay: 2; }
-.stat-card:nth-child(3) { --delay: 3; }
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #007AFF, #5856D6, #AF52DE);
+}
 
 .stat-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3);
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .stat-icon {
   font-size: 2.5rem;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+  margin-bottom: 1rem;
+  display: block;
+  filter: grayscale(0.3);
 }
 
 .stat-content {
-  flex: 1;
+  text-align: left;
 }
 
 .stat-number {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #2d3748;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1d1d1f;
   line-height: 1;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #718096;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #86868b;
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 /* Workouts Container */
 .workouts-container {
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .workouts-list {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .workout-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) calc(0.1s * var(--index, 0)) both;
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .workout-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3);
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .workout-header {
@@ -405,6 +391,7 @@ function formatDate(dateString: string): string {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
 }
 
 .workout-emoji {
@@ -414,48 +401,75 @@ function formatDate(dateString: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-  border-radius: 14px;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+  background: #f5f5f7;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .workout-type h3 {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1d1d1f;
   text-transform: capitalize;
+  letter-spacing: -0.01em;
 }
 
+.workout-type input {
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.workout-type input:focus {
+  border-color: #007AFF;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* Action Buttons im Apple Stil */
 .delete-button {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: #ff3b30;
   border: none;
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
 }
 
 .delete-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
-  background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+  background: #d70015;
+  transform: scale(1.05);
+}
+
+.delete-button[style*="background: linear-gradient(135deg,#51d6a9,#1abc9c)"] {
+  background: #34c759 !important;
+}
+
+.delete-button[style*="background: linear-gradient(135deg,#51d6a9,#1abc9c)"]:hover {
+  background: #28a745 !important;
 }
 
 .delete-button span {
-  font-size: 1.2rem;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  font-size: 1.1rem;
 }
 
 .workout-details {
   display: flex;
   gap: 2rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .workout-info {
@@ -463,22 +477,50 @@ function formatDate(dateString: string): string {
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
-  color: #4a5568;
+  color: #86868b;
+  font-size: 0.95rem;
+}
+
+.workout-info input {
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.workout-info input:focus {
+  border-color: #007AFF;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
 
 .info-icon {
   font-size: 1rem;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .workout-notes {
+  background: #f5f5f7;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
-  background: rgba(102, 126, 234, 0.05);
-  padding: 1rem;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
+}
+
+.workout-notes textarea {
+  background: transparent;
+  border: none;
+  width: 100%;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  color: #1d1d1f;
+  line-height: 1.5;
 }
 
 .notes-icon {
@@ -489,63 +531,95 @@ function formatDate(dateString: string): string {
 
 .workout-notes p {
   margin: 0;
-  color: #4a5568;
+  color: #1d1d1f;
   line-height: 1.5;
-  font-style: italic;
+  font-style: normal;
+}
+
+/* Edit Form Buttons */
+.workout-card button {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.workout-card button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.workout-card button:last-child {
+  background: #8e8e93;
+  margin-left: 0.5rem;
+}
+
+.workout-card button:last-child:hover {
+  background: #6d6d70;
 }
 
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 3rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: fadeIn 0.8s ease-out;
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 .empty-icon {
   font-size: 4rem;
-  margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
 }
 
 .empty-state h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3748;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.02em;
 }
 
 .empty-state p {
   margin: 0;
-  color: #718096;
-  font-size: 1rem;
+  color: #86868b;
+  font-size: 1.1rem;
   line-height: 1.5;
+  font-weight: 400;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   
   .app-subtitle {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
   }
   
   .content-section {
-    padding: 1rem;
-    gap: 1.5rem;
+    padding: 1.5rem;
+    gap: 2rem;
   }
   
   .stats-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem;
   }
   
   .workout-details {
@@ -554,43 +628,61 @@ function formatDate(dateString: string): string {
   }
   
   .section-title {
-    font-size: 1.3rem;
+    font-size: 1.75rem;
+  }
+  
+  .workout-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .workout-header > div:last-child {
+    align-self: flex-end;
+    display: flex;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .app-header {
-    padding: 1.5rem 1rem 0.5rem;
+    padding: 2rem 1rem 1.5rem;
   }
   
   .app-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
+  }
+  
+  .app-subtitle {
+    font-size: 1rem;
+  }
+  
+  .content-section {
+    padding: 1rem;
   }
   
   .stat-card {
     padding: 1.25rem;
   }
   
-  .stat-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 2rem;
-  }
-  
   .stat-number {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
   
   .workout-card {
     padding: 1.25rem;
   }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
 }
 
-/* Animationen */
+/* Apple-style Smooth Animations */
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -601,7 +693,7 @@ function formatDate(dateString: string): string {
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-30px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
@@ -618,13 +710,15 @@ function formatDate(dateString: string): string {
   }
 }
 
-/* Fokus-Indikatoren für Barrierefreiheit */
-.delete-button:focus-visible {
-  outline: 2px solid #667eea;
+/* Fokus-Indikatoren im Apple Stil */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #007AFF;
   outline-offset: 2px;
 }
 
-/* Hover-Effekte für Desktop */
+/* Subtile Hover-Effekte */
 @media (hover: hover) {
   .stat-card:hover .stat-icon {
     transform: scale(1.05);
@@ -633,5 +727,11 @@ function formatDate(dateString: string): string {
   .workout-card:hover .workout-emoji {
     transform: scale(1.1);
   }
+}
+
+/* Apple-style Typography */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 </style>
