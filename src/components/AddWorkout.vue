@@ -15,6 +15,7 @@ import { ref } from 'vue'
 const type = ref('')
 const duration = ref(0)
 const date = ref('')
+const notes = ref('')
 
 // Das Event vorbereiten (damit wir Daten an die App schicken können)
 const emit = defineEmits(['add'])
