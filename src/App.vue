@@ -43,6 +43,11 @@ function deleteWorkout(index: number) {
     <button @click="deleteWorkout(index)">Löschen</button>
   </li>
 </ul>
+  <div class="stats">
+  <h3>Deine Statistik:</h3>
+  <p>Workouts insgesamt: <b>{{ workoutCount }}</b></p>
+  <p>Trainierte Minuten: <b>{{ totalDuration }}</b></p>
+</div>
 
 
 </template>
@@ -70,6 +75,12 @@ input, textarea {
   padding: 0.5rem;
   border: none;
   border-radius: 4px;
+}
+.stats {
+  margin-bottom: 2rem;
+  background: #333;
+  padding: 1rem;
+  border-radius: 8px;
 }
 button {
   padding: 0.5rem 1rem;
