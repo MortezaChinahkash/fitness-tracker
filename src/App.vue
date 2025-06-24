@@ -15,6 +15,10 @@ const workouts = ref<Workout[]>([])
 function addWorkout(workout: Workout) {
   workouts.value.push(workout)
 }
+
+function deleteWorkout(index: number) {
+  workouts.value.splice(index, 1)
+}
 </script>
 
 <template>
@@ -24,8 +28,9 @@ function addWorkout(workout: Workout) {
 
   <h2>Deine Workouts:</h2>
   <ul>
-    <li v-for="(workout, index) in workouts" :key="index">
-      <b>{{ workout.type }}</b> – {{ workout.duration }} min – {{ workout.date }}
-    </li>
-  </ul>
+  <li v-for="(workout, index) in workouts" :key="index">
+    <b>{{ workout.type }}</b> – {{ workout.duration }} min – {{ workout.date }}
+    <button @click="deleteWorkout(index)">Löschen</button>
+  </li>
+</ul>
 </template>
