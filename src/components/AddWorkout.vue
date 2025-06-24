@@ -109,16 +109,13 @@ function addWorkout() {
 </script>
 
 <style scoped>
+/* Apple Design für AddWorkout Komponente */
 .workout-form-container {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
   position: relative;
 }
-
-/* Entferne die Hintergrund-Overlays */
-
-/* Apple Design für AddWorkout Komponente */
 
 .form-header {
   text-align: center;
@@ -128,108 +125,110 @@ function addWorkout() {
 }
 
 .form-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: white;
-  margin: 0 0 1rem 0;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .icon {
-  font-size: 3rem;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+  font-size: 2.5rem;
 }
 
 .form-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem;
-  font-weight: 300;
+  color: #86868b;
+  font-size: 1rem;
+  font-weight: 400;
   margin: 0;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .workout-form {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  padding: 3rem;
-  border-radius: 24px;
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   box-shadow: 
-    0 32px 64px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-  max-width: 550px;
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  max-width: 100%;
   width: 100%;
   position: relative;
   z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .input-group {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .input-label {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-weight: 600;
-  color: #2d3748;
-  font-size: 0.95rem;
-  margin-bottom: 0.75rem;
-  letter-spacing: 0.3px;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .label-icon {
-  font-size: 1.2rem;
-  width: 1.5rem;
+  font-size: 1.1rem;
+  width: 1.2rem;
   text-align: center;
+  opacity: 0.8;
 }
 
 .optional-badge {
   margin-left: auto;
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-  color: #1976d2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
+  background: #f5f5f7;
+  color: #86868b;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: 0;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 1.25rem 1.5rem;
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
-  background: #ffffff;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #f5f5f7;
   font-size: 1rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  transition: all 0.2s ease;
   outline: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  color: #2d3748;
-  font-weight: 500;
+  color: #1d1d1f;
+  font-weight: 400;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
 }
 
 .form-input:focus,
 .form-textarea:focus {
-  border-color: #667eea;
-  box-shadow: 
-    0 0 0 4px rgba(102, 126, 234, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  border-color: #007AFF;
   background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  transform: none;
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: #a0aec0;
+  color: #86868b;
   font-weight: 400;
 }
 
@@ -240,99 +239,80 @@ function addWorkout() {
 }
 
 .duration-input {
-  padding-right: 6rem !important;
+  padding-right: 5rem !important;
   box-sizing: border-box;
 }
 
 .input-unit {
   position: absolute;
-  right: 1.5rem;
-  color: #718096;
+  right: 1rem;
+  color: #86868b;
   font-weight: 500;
   font-size: 0.9rem;
   pointer-events: none;
 }
 
 .form-textarea {
-  min-height: 120px;
+  min-height: 100px;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .submit-button {
   width: 100%;
-  padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 1rem 2rem;
+  background: #007AFF;
   color: white;
   border: none;
-  border-radius: 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   text-transform: none;
-  letter-spacing: 0.3px;
+  letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 8px 24px rgba(102, 126, 234, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.submit-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.submit-button:hover::before {
-  left: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .submit-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 
-    0 12px 32px rgba(102, 126, 234, 0.4),
-    0 8px 16px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
 }
 
 .submit-button:active {
-  transform: translateY(-1px);
+  transform: translateY(0);
 }
 
 .button-icon,
 .button-arrow {
-  font-size: 1.2rem;
-  transition: transform 0.3s ease;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
 }
 
 .submit-button:hover .button-arrow {
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .submit-button:hover .button-icon {
-  transform: scale(1.1) rotate(10deg);
+  transform: scale(1.05);
 }
 
 /* Input-Typ spezifische Styles */
 input[type="date"] {
-  color: #2d3748;
-  font-weight: 500;
+  color: #1d1d1f;
+  font-weight: 400;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: opacity(0.6);
+  opacity: 0.6;
   cursor: pointer;
 }
 
@@ -351,32 +331,31 @@ input[type="number"]::-webkit-inner-spin-button {
 @media (max-width: 768px) {
   .workout-form-container {
     padding: 1.5rem;
-    min-height: 100vh;
   }
   
   .form-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
     flex-direction: column;
     gap: 0.5rem;
   }
   
   .form-subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   .workout-form {
-    padding: 2rem;
-    border-radius: 20px;
+    padding: 1.5rem;
+    border-radius: 16px;
   }
   
   .form-input,
   .form-textarea {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 0.875rem;
     font-size: 16px; /* Verhindert Zoom auf iOS */
   }
   
   .submit-button {
-    padding: 1rem 1.5rem;
+    padding: 0.875rem 1.5rem;
     font-size: 1rem;
   }
 }
@@ -387,29 +366,29 @@ input[type="number"]::-webkit-inner-spin-button {
   }
   
   .workout-form {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
   
   .form-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
   
   .input-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 }
 
-/* Animationen */
+/* Apple-style Smooth Animations */
 .workout-form-container {
-  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .workout-form {
-  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+  animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s both;
 }
 
 .input-group {
-  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) calc(0.1s * var(--delay, 0)) both;
+  animation: fadeIn 0.3s ease-out calc(0.05s * var(--delay, 0)) both;
 }
 
 .input-group:nth-child(1) { --delay: 1; }
@@ -418,13 +397,22 @@ input[type="number"]::-webkit-inner-spin-button {
 .input-group:nth-child(4) { --delay: 4; }
 
 .submit-button {
-  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+  animation: fadeIn 0.3s ease-out 0.3s both;
 }
 
-@keyframes fadeInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -432,37 +420,30 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Fokus-Indikatoren für Barrierefreiheit */
+/* Fokus-Indikatoren im Apple Stil */
 .form-input:focus-visible,
 .form-textarea:focus-visible,
 .submit-button:focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid #007AFF;
   outline-offset: 2px;
 }
 
 /* Hover-Effekte für Desktop */
 @media (hover: hover) {
   .form-input:hover {
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 122, 255, 0.3);
+    background: #ffffff;
   }
   
   .form-textarea:hover {
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 122, 255, 0.3);
+    background: #ffffff;
   }
 }
+
+/* Apple Typography */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 </style>
-
-
