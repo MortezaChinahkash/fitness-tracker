@@ -98,6 +98,7 @@ function formatDate(dateString: string): string {
           :workoutCount="workoutCount"
           :totalDuration="totalDuration"
           :averageDuration="averageDuration"
+          :workouts="workouts"
         />
 
         <div v-if="workouts.length > 0" class="recent-workouts">
@@ -137,6 +138,7 @@ function formatDate(dateString: string): string {
           :workoutCount="workoutCount"
           :totalDuration="totalDuration"
           :averageDuration="averageDuration"
+          :workouts="workouts"
         />
       </div>
 
