@@ -1,3 +1,12 @@
+<template>
+  <form @submit.prevent="addWorkout">
+    <input v-model="type" placeholder="Art des Workouts" required />
+    <input type="number" v-model="duration" placeholder="Dauer (Minuten)" required />
+    <input type="date" v-model="date" required />
+    <button type="submit">Hinzufügen</button>
+  </form>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 
