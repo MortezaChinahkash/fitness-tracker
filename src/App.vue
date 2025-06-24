@@ -17,6 +17,8 @@ interface Workout {
 }
 
 const workouts = ref<Workout[]>([])
+const editIndex = ref(-1) // Kein Eintrag wird editiert, solange -1
+const editWorkout = ref<Workout | null>(null) // Temporäres Bearbeiten-Objekt
 
 // Funktion, um ein Workout hinzuzufügen
 function addWorkout(workout: Workout) {
