@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import AddWorkout from './components/AddWorkout.vue'
+
+const totalDuration = computed(() =>
+  workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
+);
+
+const workoutCount = computed(() => workouts.value.length);
 
 // Eine Liste für alle Workouts
 interface Workout {
