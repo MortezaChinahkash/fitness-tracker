@@ -9,22 +9,22 @@
       </div>
       
       <nav class="header-nav">
-        <a href="#dashboard" class="nav-link active">
+        <button @click="$emit('navigate', 'dashboard')" :class="['nav-link', { active: currentView === 'dashboard' }]">
           <span class="nav-icon">📊</span>
           Dashboard
-        </a>
-        <a href="#workouts" class="nav-link">
+        </button>
+        <button @click="$emit('navigate', 'workouts')" :class="['nav-link', { active: currentView === 'workouts' }]">
           <span class="nav-icon">💪</span>
           Workouts
-        </a>
-        <a href="#statistics" class="nav-link">
+        </button>
+        <button @click="$emit('navigate', 'statistics')" :class="['nav-link', { active: currentView === 'statistics' }]">
           <span class="nav-icon">📈</span>
           Statistiken
-        </a>
-        <a href="#profile" class="nav-link">
+        </button>
+        <button @click="$emit('navigate', 'profile')" :class="['nav-link', { active: currentView === 'profile' }]">
           <span class="nav-icon">👤</span>
           Profil
-        </a>
+        </button>
       </nav>
       
       <div class="header-right">
@@ -41,7 +41,17 @@
 </template>
 
 <script setup lang="ts">
-// Keine reactive Daten für jetzt, aber bereit für zukünftige Funktionalität
+// Props für den aktuellen View-Status
+interface Props {
+  currentView?: string
+}
+
+defineProps<Props>()
+
+// Events für Navigation
+defineEmits<{
+  navigate: [view: string]
+}>()
 </script>
 
 <style scoped>
@@ -104,12 +114,15 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  text-decoration: none;
+  border: none;
+  background: transparent;
   color: #86868b;
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.2s ease;
   letter-spacing: -0.01em;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .nav-link:hover {
