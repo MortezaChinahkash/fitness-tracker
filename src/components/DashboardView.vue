@@ -1,120 +1,100 @@
 <template>
   <div class="dashboard-container">
-    <!-- Quick Stats (Nur die wichtigsten 3) -->
-    <div class="quick-stats">
-      <div class="quick-stat-card">
-        <div class="stat-icon">🎯</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ workoutCount }}</div>
-          <div class="stat-label">Workouts</div>
-        </div>
+    <!-- Welcome Message -->
+    <div class="welcome-card">
+      <div class="welcome-content">
+        <h2>{{ welcomeMessage }}</h2>
+        <p>{{ welcomeSubtitle }}</p>
       </div>
-      <div class="quick-stat-card">
-        <div class="stat-icon">⏰</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ totalDuration }}</div>
-          <div class="stat-label">Minuten</div>
-        </div>
-      </div>
-      <div class="quick-stat-card">
-        <div class="stat-icon">📅</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ thisWeekWorkouts }}</div>
-          <div class="stat-label">Diese Woche</div>
-        </div>
-      </div>
+      <div class="welcome-icon">{{ welcomeIcon }}</div>
     </div>
 
-    <!-- Heutige Motivation / Status -->
-    <div class="motivation-card">
-      <div class="motivation-header">
-        <span class="motivation-icon">{{ motivationIcon }}</span>
-        <div class="motivation-content">
-          <h3>{{ motivationTitle }}</h3>
+    <!-- Today's Focus -->
+    <div class="today-focus" v-if="!hasWorkoutToday">
+      <div class="focus-header">
+        <span class="focus-icon">💪</span>
+        <div class="focus-content">
+          <h3>Bereit für heute?</h3>
           <p>{{ motivationMessage }}</p>
         </div>
       </div>
-      <div class="motivation-action" v-if="!hasWorkoutToday">
-        <button class="motivation-btn" @click="$emit('showAddWorkout')">
-          <span>💪</span>
-          Jetzt trainieren
-        </button>
-      </div>
-    </div>
-
-    <!-- Letzte Aktivitäten (Kompakt) -->
-    <div v-if="workouts.length > 0" class="recent-activities">
-      <h3 class="section-title">
-        <span class="section-icon">⚡</span>
-        Letzte Aktivitäten
-      </h3>
-      <div class="recent-list">
-        <div v-for="(workout, index) in recentWorkouts" :key="index" class="recent-item">
-          <span class="recent-emoji">{{ getWorkoutEmoji(workout.type) }}</span>
-          <div class="recent-content">
-            <h4>{{ workout.type }}</h4>
-            <p>{{ workout.duration }} Min • {{ formatDate(workout.date) }}</p>
-          </div>
-          <div class="recent-badge">{{ getDaysAgo(workout.date) }}</div>
-        </div>
-      </div>
-      <button class="view-all-btn" @click="$emit('navigateToWorkouts')">
-        Alle Workouts anzeigen →
+      <button class="start-workout-btn" @click="$emit('showAddWorkout')">
+        <span>🚀</span>
+        Workout starten
       </button>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
+    <!-- Today's Achievement (wenn bereits trainiert) -->
+    <div class="achievement-card" v-else>
+      <div class="achievement-content">
+        <span class="achievement-icon">🎉</span>
+        <div>
+          <h3>Ziel erreicht!</h3>
+          <p>Du hast heute bereits {{ todaysWorkouts }} Workout{{ todaysWorkouts > 1 ? 's' : '' }} absolviert</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Overview (Nur die wichtigsten 2 Zahlen) -->
+    <div class="quick-overview">
+      <div class="overview-card">
+        <div class="overview-icon">🔥</div>
+        <div class="overview-content">
+          <div class="overview-number">{{ thisWeekWorkouts }}</div>
+          <div class="overview-label">Diese Woche</div>
+        </div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-icon">🎯</div>
+        <div class="overview-content">
+          <div class="overview-number">{{ workoutCount }}</div>
+          <div class="overview-label">Gesamt</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest Activity (Nur das letzte Workout) -->
+    <div v-if="workouts.length > 0" class="latest-activity">
       <h3 class="section-title">
-        <span class="section-icon">🚀</span>
-        Schnellaktionen
+        <span class="section-icon">⚡</span>
+        Letztes Training
       </h3>
-      <div class="actions-grid">
-        <button class="action-card" @click="$emit('showAddWorkout')">
-          <span class="action-icon">➕</span>
-          <div class="action-content">
-            <h4>Workout hinzufügen</h4>
-            <p>Neues Training erfassen</p>
-          </div>
-        </button>
-        <button class="action-card" @click="$emit('navigateToStatistics')">
-          <span class="action-icon">📊</span>
-          <div class="action-content">
-            <h4>Statistiken</h4>
-            <p>Fortschritte anzeigen</p>
-          </div>
-        </button>
-        <button class="action-card" @click="$emit('navigateToProfile')">
-          <span class="action-icon">👤</span>
-          <div class="action-content">
-            <h4>Profil</h4>
-            <p>Erfolge & Einstellungen</p>
-          </div>
+      <div class="activity-card">
+        <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.type) }}</span>
+        <div class="activity-content">
+          <h4>{{ latestWorkout.type }}</h4>
+          <p>{{ latestWorkout.duration }} Minuten • {{ getDaysAgo(latestWorkout.date) }}</p>
+        </div>
+        <button class="view-more-btn" @click="$emit('navigateToWorkouts')">
+          Alle anzeigen
         </button>
       </div>
     </div>
 
-    <!-- Wöchentliches Ziel (Simpel) -->
-    <div class="weekly-goal">
-      <h3 class="section-title">
-        <span class="section-icon">🏆</span>
-        Wochenziel
-      </h3>
-      <div class="goal-card">
-        <div class="goal-header">
-          <span class="goal-icon">🎯</span>
-          <div class="goal-info">
-            <h4>{{ thisWeekWorkouts }} / {{ weeklyGoal }} Workouts</h4>
-            <p>{{ goalProgress }}% erreicht</p>
-          </div>
-        </div>
-        <div class="goal-progress">
-          <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: goalProgress + '%' }"></div>
-          </div>
-          <span class="progress-text">{{ remainingWorkouts > 0 ? remainingWorkouts + ' noch zu gehen' : 'Ziel erreicht! 🎉' }}</span>
-        </div>
+    <!-- Weekly Progress (Vereinfacht) -->
+    <div class="weekly-progress">
+      <div class="progress-header">
+        <h3>Wochenziel</h3>
+        <span class="progress-percentage">{{ goalProgress }}%</span>
       </div>
+      <div class="progress-bar">
+        <div class="progress-fill" :style="{ width: goalProgress + '%' }"></div>
+      </div>
+      <p class="progress-subtitle">
+        {{ remainingWorkouts > 0 ? `Noch ${remainingWorkouts} Workout${remainingWorkouts > 1 ? 's' : ''} bis zum Ziel` : 'Wochenziel erreicht! 🎉' }}
+      </p>
+    </div>
+
+    <!-- Quick Actions (Reduziert auf das Wichtigste) -->
+    <div class="dashboard-actions">
+      <button class="action-primary" @click="$emit('showAddWorkout')">
+        <span>➕</span>
+        Neues Workout
+      </button>
+      <button class="action-secondary" @click="$emit('navigateToStatistics')">
+        <span>📊</span>
+        Statistiken
+      </button>
     </div>
   </div>
 </template>
@@ -157,32 +137,43 @@ const hasWorkoutToday = computed(() => {
   return props.workouts.some(w => new Date(w.date).toDateString() === today)
 })
 
-const recentWorkouts = computed(() => {
+const todaysWorkouts = computed(() => {
+  const today = new Date().toDateString()
+  return props.workouts.filter(w => new Date(w.date).toDateString() === today).length
+})
+
+const latestWorkout = computed(() => {
   return [...props.workouts]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+})
+
+// Welcome Message
+const welcomeMessage = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Guten Morgen!'
+  if (hour < 18) return 'Guten Tag!'
+  return 'Guten Abend!'
+})
+
+const welcomeSubtitle = computed(() => {
+  if (hasWorkoutToday.value) return 'Du hast heute bereits trainiert! 🎉'
+  if (thisWeekWorkouts.value >= 3) return 'Du bist diese Woche schon richtig aktiv!'
+  return 'Zeit für ein Workout!'
+})
+
+const welcomeIcon = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 12) return '🌅'
+  if (hour < 18) return '☀️'
+  return '🌙'
 })
 
 // Motivation
-const motivationIcon = computed(() => {
-  if (hasWorkoutToday.value) return '🎉'
-  if (thisWeekWorkouts.value >= 3) return '🔥'
-  if (thisWeekWorkouts.value >= 1) return '💪'
-  return '🚀'
-})
-
-const motivationTitle = computed(() => {
-  if (hasWorkoutToday.value) return 'Großartig gemacht!'
-  if (thisWeekWorkouts.value >= 3) return 'Du bist in Fahrt!'
-  if (thisWeekWorkouts.value >= 1) return 'Weiter so!'
-  return 'Zeit für Bewegung!'
-})
-
 const motivationMessage = computed(() => {
-  if (hasWorkoutToday.value) return 'Du hast heute bereits trainiert. Morgen geht es weiter!'
-  if (thisWeekWorkouts.value >= 3) return 'Du hast diese Woche schon toll trainiert!'
-  if (thisWeekWorkouts.value >= 1) return 'Du hast einen guten Start hingelegt.'
-  return 'Starte dein erstes Workout der Woche!'
+  if (thisWeekWorkouts.value === 0) return 'Starte deinen ersten Trainingsag dieser Woche!'
+  if (thisWeekWorkouts.value === 1) return 'Großartig! Lass uns weitermachen.'
+  if (thisWeekWorkouts.value === 2) return 'Du bist auf einem guten Weg!'
+  return 'Du machst das fantastisch!'
 })
 
 // Wochenziel
@@ -210,14 +201,6 @@ function getWorkoutEmoji(type: string): string {
   return emojiMap[key] || '🏃‍♂️'
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('de-DE', { 
-    day: '2-digit', 
-    month: '2-digit'
-  })
-}
-
 function getDaysAgo(dateString: string): string {
   const date = new Date(dateString)
   const today = new Date()
@@ -226,8 +209,8 @@ function getDaysAgo(dateString: string): string {
   
   if (diffDays === 0) return 'Heute'
   if (diffDays === 1) return 'Gestern'
-  if (diffDays < 7) return `${diffDays}d`
-  return `${Math.floor(diffDays / 7)}w`
+  if (diffDays < 7) return `vor ${diffDays} Tagen`
+  return `vor ${Math.floor(diffDays / 7)} Woche${Math.floor(diffDays / 7) > 1 ? 'n' : ''}`
 }
 </script>
 
