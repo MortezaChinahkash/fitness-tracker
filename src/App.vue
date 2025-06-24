@@ -28,6 +28,24 @@ function addWorkout(workout: Workout) {
 function deleteWorkout(index: number) {
   workouts.value.splice(index, 1)
 }
+function startEdit(index: number) {
+  editIndex.value = index;
+  // Deep Copy, damit Änderungen nicht sofort in der Liste sind
+  editWorkout.value = { ...workouts.value[index] };
+}
+
+function saveEdit(index: number) {
+  if (editWorkout.value) {
+    workouts.value[index] = { ...editWorkout.value };
+    editIndex.value = -1;
+    editWorkout.value = null;
+  }
+}
+
+function cancelEdit() {
+  editIndex.value = -1;
+  editWorkout.value = null;
+}
 
 // Hilfsfunktionen für bessere Darstellung
 const averageDuration = computed(() => 
@@ -74,10 +92,10 @@ function formatDate(dateString: string): string {
     </header>
 
     <main class="app-main">
-      <!-- Wir übergeben die Funktion als Event-Listener an die Komponente -->
       <AddWorkout @add="addWorkout" />
 
       <div class="content-section">
+        <!-- Statistik -->
         <div class="stats-container">
           <h2 class="section-title">
             <span class="section-icon">📊</span>
@@ -108,6 +126,7 @@ function formatDate(dateString: string): string {
           </div>
         </div>
 
+        <!-- Workouts Liste mit Editierfunktion -->
         <div class="workouts-container" v-if="workouts.length > 0">
           <h2 class="section-title">
             <span class="section-icon">📋</span>
@@ -115,29 +134,62 @@ function formatDate(dateString: string): string {
           </h2>
           <div class="workouts-list">
             <div v-for="(workout, index) in workouts" :key="index" class="workout-card">
-              <div class="workout-header">
-                <div class="workout-type">
-                  <span class="workout-emoji">{{ getWorkoutEmoji(workout.type) }}</span>
-                  <h3>{{ workout.type }}</h3>
+              <template v-if="editIndex === index">
+                <!-- Bearbeitungsformular -->
+                <div class="workout-header">
+                  <div class="workout-type">
+                    <span class="workout-emoji">{{ getWorkoutEmoji(editWorkout!.type) }}</span>
+                    <input v-model="editWorkout!.type" placeholder="Art des Workouts" required style="font-weight:bold; font-size:1.1rem;" />
+                  </div>
                 </div>
-                <button @click="deleteWorkout(index)" class="delete-button">
-                  <span>🗑️</span>
-                </button>
-              </div>
-              <div class="workout-details">
-                <div class="workout-info">
-                  <span class="info-icon">⏱️</span>
-                  <span>{{ workout.duration }} Minuten</span>
+                <div class="workout-details">
+                  <div class="workout-info">
+                    <span class="info-icon">⏱️</span>
+                    <input type="number" v-model="editWorkout!.duration" placeholder="Dauer (Minuten)" required style="width:70px;" />
+                    <span>Minuten</span>
+                  </div>
+                  <div class="workout-info">
+                    <span class="info-icon">📅</span>
+                    <input type="date" v-model="editWorkout!.date" required />
+                  </div>
                 </div>
-                <div class="workout-info">
-                  <span class="info-icon">📅</span>
-                  <span>{{ formatDate(workout.date) }}</span>
+                <div class="workout-notes">
+                  <span class="notes-icon">📝</span>
+                  <textarea v-model="editWorkout!.notes" placeholder="Notizen (optional)" rows="2"></textarea>
                 </div>
-              </div>
-              <div v-if="workout.notes" class="workout-notes">
-                <span class="notes-icon">📝</span>
-                <p>{{ workout.notes }}</p>
-              </div>
+                <div style="margin-top:1rem;">
+                  <button @click="saveEdit(index)" style="margin-right:1rem;">Speichern</button>
+                  <button @click="cancelEdit">Abbrechen</button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="workout-header">
+                  <div class="workout-type">
+                    <span class="workout-emoji">{{ getWorkoutEmoji(workout.type) }}</span>
+                    <h3>{{ workout.type }}</h3>
+                  </div>
+                  <button @click="deleteWorkout(index)" class="delete-button">
+                    <span>🗑️</span>
+                  </button>
+                  <button @click="startEdit(index)" class="delete-button" style="background: linear-gradient(135deg,#51d6a9,#1abc9c); margin-left: 0.5rem;">
+                    <span>✏️</span>
+                  </button>
+                </div>
+                <div class="workout-details">
+                  <div class="workout-info">
+                    <span class="info-icon">⏱️</span>
+                    <span>{{ workout.duration }} Minuten</span>
+                  </div>
+                  <div class="workout-info">
+                    <span class="info-icon">📅</span>
+                    <span>{{ formatDate(workout.date) }}</span>
+                  </div>
+                </div>
+                <div v-if="workout.notes" class="workout-notes">
+                  <span class="notes-icon">📝</span>
+                  <p>{{ workout.notes }}</p>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -150,9 +202,8 @@ function formatDate(dateString: string): string {
       </div>
     </main>
   </div>
-
-
 </template>
+
 
 
 <style scoped>
