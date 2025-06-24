@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import AddWorkout from './components/AddWorkout.vue'
 import AppHeader from './components/AppHeader.vue'
-import AppFooter from './components/AppFooter.vue'
 
 const totalDuration = computed(() =>
   workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
@@ -205,8 +204,6 @@ function formatDate(dateString: string): string {
         </div>
       </div>
     </main>
-    
-    <AppFooter :workoutCount="workoutCount" />
   </div>
 </template>
 
@@ -220,8 +217,7 @@ function formatDate(dateString: string): string {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   color: #1d1d1f;
   position: relative;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 2rem; /* Extra Padding am Ende statt Footer */
 }
 
 /* Hero Section */
@@ -266,7 +262,7 @@ function formatDate(dateString: string): string {
 .content-section {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 2rem 4rem; /* Extra Padding unten für besseren Abschluss */
   display: grid;
   gap: 3rem;
 }
