@@ -292,6 +292,11 @@ const isFormValid = computed(() => {
 })
 
 // Methods
+/**
+ * Generates initials from a full name by taking the first letter of each word
+ * @param {string} name - The full name to generate initials from
+ * @returns {string} The initials (up to 2 characters) in uppercase
+ */
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -300,6 +305,10 @@ function getInitials(name: string): string {
     .join('')
 }
 
+/**
+ * Initiates the profile editing mode by setting isEditing to true
+ * and populating editData with current profile data plus empty password fields
+ */
 function startEditing() {
   isEditing.value = true
   editData.value = {
@@ -310,6 +319,10 @@ function startEditing() {
   }
 }
 
+/**
+ * Cancels the profile editing mode by resetting isEditing to false
+ * and clearing all edit data back to default empty values
+ */
 function cancelEditing() {
   isEditing.value = false
   editData.value = {
@@ -323,10 +336,19 @@ function cancelEditing() {
   }
 }
 
+/**
+ * Toggles the visibility of a specific password field
+ * @param field - The password field to toggle ('current', 'new', or 'confirm')
+ */
 function togglePasswordVisibility(field: 'current' | 'new' | 'confirm') {
   showPasswords.value[field] = !showPasswords.value[field]
 }
 
+/**
+ * Handles file upload for profile avatar
+ * Validates file size (max 5MB) and type (must be image), then converts to base64
+ * @param event - The file input change event containing the selected file
+ */
 function handleFileUpload(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) {
@@ -350,6 +372,10 @@ function handleFileUpload(event: Event) {
   }
 }
 
+/**
+ * Removes the current avatar image from the edit data
+ * and clears the file input field
+ */
 function removeAvatar() {
   editData.value.avatar = ''
   if (fileInput.value) {
@@ -357,6 +383,11 @@ function removeAvatar() {
   }
 }
 
+/**
+ * Saves the profile changes after validation
+ * Validates password requirements, updates profile data, and persists to localStorage
+ * Shows success/error messages and exits editing mode on success
+ */
 async function saveProfile() {
   if (!isFormValid.value) return
 
@@ -391,6 +422,10 @@ async function saveProfile() {
   }
 }
 
+/**
+ * Loads the user profile data from localStorage
+ * Merges saved data with default profile values, with error handling for invalid JSON
+ */
 function loadProfile() {
   const saved = localStorage.getItem('fitness-profile')
   if (saved) {
