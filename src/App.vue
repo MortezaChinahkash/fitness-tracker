@@ -164,8 +164,6 @@ const averageDuration = computed(() =>
   </div>
 </template>
 
-
-
 <style scoped>
 /* Apple Design System - Minimalistische Eleganz */
 .app-container {
