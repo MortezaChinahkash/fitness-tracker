@@ -36,8 +36,34 @@
           <span class="notification-icon">🔔</span>
           <span v-if="activeRemindersCount > 0" class="notification-badge">{{ activeRemindersCount }}</span>
         </button>
-        <div class="user-avatar">
-          <span class="avatar-text">JD</span>
+        
+        <!-- User Avatar with Dropdown -->
+        <div class="user-menu" ref="userMenuRef">
+          <button class="user-avatar" @click="toggleUserMenu" :class="{ active: showUserMenu }">
+            <img v-if="userAvatar" :src="userAvatar" :alt="userName" class="avatar-image" />
+            <span v-else class="avatar-text">{{ userInitials }}</span>
+          </button>
+          
+          <!-- User Dropdown Menu -->
+          <div v-if="showUserMenu" class="user-dropdown">
+            <div class="dropdown-header">
+              <div class="user-info">
+                <div class="user-name">{{ userName }}</div>
+                <div class="user-email">{{ userEmail }}</div>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-actions">
+              <button @click="goToProfile" class="dropdown-item">
+                <span class="item-icon">👤</span>
+                Profil bearbeiten
+              </button>
+              <button @click="handleLogout" class="dropdown-item logout-item">
+                <span class="item-icon">🚪</span>
+                Abmelden
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -45,7 +71,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { logoutUser } from '../firebase/authService'
+import { useFirebase } from '../composables/useFirebase'
 
 // Props für den aktuellen View-Status
 interface Props {
@@ -60,21 +88,93 @@ const emit = defineEmits<{
   toggleReminders: []
 }>()
 
+// Firebase integration
+const { user, userProfileData } = useFirebase()
+
 // Reminder State
 const showReminders = ref(false)
 const savedReminders = ref<any[]>([])
 
-// Computed
+// User Menu State
+const showUserMenu = ref(false)
+const userMenuRef = ref<HTMLElement>()
+
+// Computed Properties
 const activeRemindersCount = computed(() => {
   return savedReminders.value.filter(reminder => reminder.enabled).length
 })
 
+const userName = computed(() => {
+  return userProfileData.value?.name || user.value?.displayName || 'Benutzer'
+})
+
+const userEmail = computed(() => {
+  return userProfileData.value?.email || user.value?.email || ''
+})
+
+const userAvatar = computed(() => {
+  return userProfileData.value?.avatar || user.value?.photoURL || null
+})
+
+const userInitials = computed(() => {
+  const name = userName.value
+  return name
+    .split(' ')
+    .map(part => part.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('')
+})
+
 // Methods
+/**
+ * Toggles the reminders modal
+ */
 function toggleReminders() {
   showReminders.value = !showReminders.value
   emit('toggleReminders')
 }
 
+/**
+ * Toggles the user menu dropdown
+ */
+function toggleUserMenu() {
+  showUserMenu.value = !showUserMenu.value
+}
+
+/**
+ * Navigates to the profile page and closes the user menu
+ */
+function goToProfile() {
+  emit('navigate', 'profile')
+  showUserMenu.value = false
+}
+
+/**
+ * Handles user logout
+ */
+async function handleLogout() {
+  try {
+    await logoutUser()
+    showUserMenu.value = false
+    // User will be automatically redirected by the auth state change
+  } catch (error) {
+    console.error('Error logging out:', error)
+    alert('Fehler beim Abmelden. Bitte versuchen Sie es erneut.')
+  }
+}
+
+/**
+ * Closes user menu when clicking outside
+ */
+function handleClickOutside(event: MouseEvent) {
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    showUserMenu.value = false
+  }
+}
+
+/**
+ * Loads reminders from localStorage
+ */
 function loadReminders() {
   const saved = localStorage.getItem('workout-reminders')
   if (saved) {
@@ -92,6 +192,14 @@ onMounted(() => {
       loadReminders()
     }
   })
+  
+  // Listen for clicks outside user menu
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  // Cleanup event listener
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -242,29 +350,6 @@ onMounted(() => {
   line-height: 1;
 }
 
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #007AFF, #5856D6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-}
-
-.avatar-text {
-  color: white;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.02em;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-container {
@@ -336,5 +421,141 @@ onMounted(() => {
 .user-avatar:focus-visible {
   outline: 2px solid #007AFF;
   outline-offset: 2px;
+}
+
+/* User Menu Styles */
+.user-menu {
+  position: relative;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.user-avatar.active {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  min-width: 240px;
+  overflow: hidden;
+  z-index: 1000;
+  animation: dropdownSlide 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-header {
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.user-info .user-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 0.25rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.user-info .user-email {
+  font-size: 0.9rem;
+  color: #86868b;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 0 1rem;
+}
+
+.dropdown-actions {
+  padding: 0.75rem 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f7;
+}
+
+.dropdown-item.logout-item {
+  color: #ff3b30;
+}
+
+.dropdown-item.logout-item:hover {
+  background: rgba(255, 59, 48, 0.05);
+}
+
+.item-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
 }
 </style>

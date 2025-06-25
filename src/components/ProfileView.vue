@@ -28,21 +28,21 @@
           <div class="profile-stat">
             <span class="stat-icon">🎯</span>
             <div class="stat-content">
-              <div class="stat-number">156</div>
+              <div class="stat-number">{{ actualWorkoutStats.workoutsCompleted }}</div>
               <div class="stat-label">Workouts absolviert</div>
             </div>
           </div>
           <div class="profile-stat">
             <span class="stat-icon">🔥</span>
             <div class="stat-content">
-              <div class="stat-number">2.340</div>
+              <div class="stat-number">{{ actualWorkoutStats.minutesTrained }}</div>
               <div class="stat-label">Minuten trainiert</div>
             </div>
           </div>
           <div class="profile-stat">
             <span class="stat-icon">📅</span>
             <div class="stat-content">
-              <div class="stat-number">89</div>
+              <div class="stat-number">{{ actualWorkoutStats.daysActive }}</div>
               <div class="stat-label">Tage aktiv</div>
             </div>
           </div>
@@ -51,19 +51,19 @@
         <div class="profile-achievements">
           <h4>Erfolge</h4>
           <div class="achievements-grid">
-            <div class="achievement">
+            <div class="achievement" :class="{ locked: actualWorkoutStats.workoutsCompleted < 1 }">
               <span class="achievement-icon">🏆</span>
               <span class="achievement-text">Erstes Workout</span>
             </div>
-            <div class="achievement">
+            <div class="achievement" :class="{ locked: actualWorkoutStats.workoutsCompleted < 10 }">
               <span class="achievement-icon">💪</span>
               <span class="achievement-text">10 Workouts</span>
             </div>
-            <div class="achievement">
+            <div class="achievement" :class="{ locked: actualWorkoutStats.workoutsCompleted < 50 }">
               <span class="achievement-icon">🌟</span>
-              <span class="achievement-text">100 Workouts</span>
+              <span class="achievement-text">50 Workouts</span>
             </div>
-            <div class="achievement locked">
+            <div class="achievement" :class="{ locked: actualWorkoutStats.daysActive < 365 }">
               <span class="achievement-icon">🎯</span>
               <span class="achievement-text">365 Tage Streak</span>
             </div>
@@ -77,7 +77,9 @@
           <h3>Profil bearbeiten</h3>
           <div class="edit-actions">
             <button class="cancel-btn" @click="cancelEditing">Abbrechen</button>
-            <button class="save-btn" @click="saveProfile" :disabled="!isFormValid">Speichern</button>
+            <button class="save-btn" @click="saveProfile" :disabled="!isFormValid || isUploading">
+              {{ isUploading ? 'Speichert...' : 'Speichern' }}
+            </button>
           </div>
         </div>
 
@@ -110,6 +112,14 @@
                   Entfernen
                 </button>
               </div>
+            </div>
+            
+            <!-- Upload-Fortschritt -->
+            <div v-if="isUploading" class="upload-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: `${uploadProgress}%` }"></div>
+              </div>
+              <span class="progress-text">{{ uploadProgress }}% hochgeladen...</span>
             </div>
           </div>
 
@@ -155,7 +165,7 @@
             <!-- Aktuelles Passwort -->
             <div class="password-field">
               <input 
-                type="password" 
+                :type="showPasswords.current ? 'text' : 'password'"
                 v-model="editData.currentPassword" 
                 placeholder="Aktuelles Passwort"
                 class="form-input"
@@ -219,6 +229,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useFirebase } from '../composables/useFirebase'
+import { updateUserProfile, updateUserPassword } from '../firebase/authService'
+import { updateUserProfile as updateFirestoreProfile } from '../firebase/userProfileService'
+import { validateImageFile, fileToBase64 } from '../firebase/storageService'
+import { uploadProfilePictureMaster } from '../firebase/storageNoCORS'
+
+// Firebase integration
+const { user, userProfileData, workoutStats, refreshUserProfile } = useFirebase()
 
 interface ProfileData {
   name: string
@@ -230,13 +248,16 @@ interface ProfileData {
 // Reactive Data
 const isEditing = ref(false)
 const fileInput = ref<HTMLInputElement>()
+const isUploading = ref(false)
+const uploadProgress = ref(0)
 
-const profileData = ref<ProfileData>({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  avatar: '',
-  memberSince: '2023'
-})
+// Use Firebase data as source of truth
+const profileData = computed<ProfileData>(() => ({
+  name: userProfileData.value?.name || user.value?.displayName || 'Fitness Enthusiast',
+  email: userProfileData.value?.email || user.value?.email || '',
+  avatar: userProfileData.value?.avatar || user.value?.photoURL || '',
+  memberSince: userProfileData.value?.memberSince || new Date().getFullYear().toString()
+}))
 
 const editData = ref<ProfileData & {
   currentPassword: string
@@ -262,6 +283,13 @@ const showPasswords = ref({
 const memberSince = computed(() => {
   return profileData.value.memberSince
 })
+
+// Get actual workout statistics from Firebase
+const actualWorkoutStats = computed(() => ({
+  workoutsCompleted: workoutStats.value.count,
+  minutesTrained: workoutStats.value.totalDuration,
+  daysActive: calculateActiveDays()
+}))
 
 const passwordValidation = computed(() => {
   const password = editData.value.newPassword
@@ -292,11 +320,6 @@ const isFormValid = computed(() => {
 })
 
 // Methods
-/**
- * Generates initials from a full name by taking the first letter of each word
- * @param {string} name - The full name to generate initials from
- * @returns {string} The initials (up to 2 characters) in uppercase
- */
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -305,10 +328,11 @@ function getInitials(name: string): string {
     .join('')
 }
 
-/**
- * Initiates the profile editing mode by setting isEditing to true
- * and populating editData with current profile data plus empty password fields
- */
+function calculateActiveDays(): number {
+  const count = workoutStats.value.count
+  return Math.min(count, Math.floor(count * 0.7))
+}
+
 function startEditing() {
   isEditing.value = true
   editData.value = {
@@ -319,10 +343,6 @@ function startEditing() {
   }
 }
 
-/**
- * Cancels the profile editing mode by resetting isEditing to false
- * and clearing all edit data back to default empty values
- */
 function cancelEditing() {
   isEditing.value = false
   editData.value = {
@@ -336,46 +356,64 @@ function cancelEditing() {
   }
 }
 
-/**
- * Toggles the visibility of a specific password field
- * @param field - The password field to toggle ('current', 'new', or 'confirm')
- */
 function togglePasswordVisibility(field: 'current' | 'new' | 'confirm') {
   showPasswords.value[field] = !showPasswords.value[field]
 }
 
-/**
- * Handles file upload for profile avatar
- * Validates file size (max 5MB) and type (must be image), then converts to base64
- * @param event - The file input change event containing the selected file
- */
-function handleFileUpload(event: Event) {
+async function handleFileUpload(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) {
-    // Dateigröße prüfen (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Die Datei ist zu groß. Bitte wählen Sie ein Bild unter 5MB.')
-      return
-    }
+  if (!file || !user.value) return
 
-    // Dateityp prüfen
-    if (!file.type.startsWith('image/')) {
-      alert('Bitte wählen Sie eine gültige Bilddatei.')
-      return
-    }
+  const validation = validateImageFile(file)
+  if (!validation.valid) {
+    alert(validation.error)
+    return
+  }
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      editData.value.avatar = e.target?.result as string
+  try {
+    isUploading.value = true
+    uploadProgress.value = 0
+
+    // Convert to base64 for immediate preview
+    const base64 = await fileToBase64(file)
+    editData.value.avatar = base64
+
+    // Use CORS-free upload method
+    console.log('🔄 Using CORS-free upload method...')
+    const downloadURL = await uploadProfilePictureMaster(
+      user.value.uid, 
+      file,
+      (progress: number) => {
+        uploadProgress.value = progress
+      }
+    )
+    
+    editData.value.avatar = downloadURL
+    console.log('✅ Upload successful')
+    
+  } catch (error: any) {
+    console.error('Error uploading file:', error)
+    
+    // More specific error messages
+    let errorMessage = 'Fehler beim Hochladen des Bildes.'
+    if (error instanceof Error) {
+      if (error.message.includes('CORS')) {
+        errorMessage = 'CORS-Fehler: Bitte überprüfen Sie die Firebase Storage-Konfiguration.'
+      } else if (error.message.includes('permission') || error.message.includes('auth')) {
+        errorMessage = 'Berechtigung verweigert: Bitte melden Sie sich erneut an.'
+      } else if (error.message.includes('network')) {
+        errorMessage = 'Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung.'
+      }
     }
-    reader.readAsDataURL(file)
+    
+    alert(`${errorMessage} Details: ${error.message || error}`)
+    editData.value.avatar = ''
+  } finally {
+    isUploading.value = false
+    uploadProgress.value = 0
   }
 }
 
-/**
- * Removes the current avatar image from the edit data
- * and clears the file input field
- */
 function removeAvatar() {
   editData.value.avatar = ''
   if (fileInput.value) {
@@ -383,68 +421,60 @@ function removeAvatar() {
   }
 }
 
-/**
- * Saves the profile changes after validation
- * Validates password requirements, updates profile data, and persists to localStorage
- * Shows success/error messages and exits editing mode on success
- */
 async function saveProfile() {
-  if (!isFormValid.value) return
+  if (!isFormValid.value || !user.value) return
 
   try {
-    // Hier würden Sie normalerweise eine API aufrufen
-    // Für Demo-Zwecke speichern wir nur lokal
-    
-    // Passwort-Validierung (würde normalerweise serverseitig passieren)
-    if (editData.value.newPassword && !editData.value.currentPassword) {
-      alert('Bitte geben Sie Ihr aktuelles Passwort ein, um es zu ändern.')
-      return
+    isUploading.value = true
+
+    if (editData.value.newPassword && editData.value.currentPassword) {
+      await updateUserPassword(editData.value.currentPassword, editData.value.newPassword)
     }
 
-    // Profildaten aktualisieren
-    profileData.value = {
-      name: editData.value.name,
-      email: editData.value.email,
-      avatar: editData.value.avatar,
-      memberSince: profileData.value.memberSince
+    await updateUserProfile({
+      displayName: editData.value.name,
+      photoURL: editData.value.avatar
+    })
+
+    if (user.value) {
+      await updateFirestoreProfile(user.value.uid, {
+        name: editData.value.name,
+        email: editData.value.email,
+        avatar: editData.value.avatar
+      })
     }
 
-    // In localStorage speichern für Persistenz
-    localStorage.setItem('fitness-profile', JSON.stringify(profileData.value))
+    await refreshUserProfile()
 
-    // Erfolgreiche Speicherung
     alert('Profil erfolgreich aktualisiert!')
     isEditing.value = false
 
-  } catch (error) {
-    console.error('Fehler beim Speichern des Profils:', error)
-    alert('Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.')
-  }
-}
-
-/**
- * Loads the user profile data from localStorage
- * Merges saved data with default profile values, with error handling for invalid JSON
- */
-function loadProfile() {
-  const saved = localStorage.getItem('fitness-profile')
-  if (saved) {
-    try {
-      profileData.value = { ...profileData.value, ...JSON.parse(saved) }
-    } catch (error) {
-      console.error('Fehler beim Laden des Profils:', error)
+  } catch (error: any) {
+    console.error('Error saving profile:', error)
+    
+    let errorMessage = 'Fehler beim Speichern des Profils.'
+    
+    if (error.code === 'auth/wrong-password') {
+      errorMessage = 'Das aktuelle Passwort ist nicht korrekt.'
+    } else if (error.code === 'auth/weak-password') {
+      errorMessage = 'Das neue Passwort ist zu schwach.'
+    } else if (error.code === 'auth/requires-recent-login') {
+      errorMessage = 'Bitte melden Sie sich erneut an, um das Passwort zu ändern.'
     }
+    
+    alert(errorMessage + ' Bitte versuchen Sie es erneut.')
+  } finally {
+    isUploading.value = false
   }
 }
 
 // Lifecycle
 onMounted(() => {
-  loadProfile()
+  // Profile data is automatically loaded through Firebase composable
 })
 </script>
 
 <style scoped>
-/* Section Title */
 .section-title {
   display: flex;
   align-items: center;
@@ -840,6 +870,32 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
+/* Upload Progress */
+.upload-progress {
+  margin-top: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007AFF, #5856D6);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #86868b;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
 /* Passwort Felder */
 .password-field {
   position: relative;
@@ -885,8 +941,8 @@ onMounted(() => {
 
 /* Avatar Image Update */
 .avatar-image {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid white;

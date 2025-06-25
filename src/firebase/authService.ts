@@ -94,8 +94,25 @@ export async function updateUserProfile(updates: { displayName?: string; photoUR
       throw new Error('No authenticated user found')
     }
     
-    await updateProfile(user, updates)
-    console.log('User profile updated successfully')
+    // Filter out base64 photoURLs as they're too long for Firebase Auth
+    const filteredUpdates: { displayName?: string; photoURL?: string } = {}
+    
+    if (updates.displayName) {
+      filteredUpdates.displayName = updates.displayName
+    }
+    
+    if (updates.photoURL && !updates.photoURL.startsWith('data:')) {
+      // Only update photoURL if it's not a base64 string
+      filteredUpdates.photoURL = updates.photoURL
+    }
+    
+    // Only update if there are valid updates
+    if (Object.keys(filteredUpdates).length > 0) {
+      await updateProfile(user, filteredUpdates)
+      console.log('User profile updated successfully')
+    } else {
+      console.log('Skipped Auth profile update (base64 photoURL detected)')
+    }
   } catch (error) {
     console.error('Error updating profile:', error)
     throw error
