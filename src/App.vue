@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import AddWorkout from './components/AddWorkout.vue'
 import AppHeader from './components/AppHeader.vue'
 import Statistics from './components/Statistics.vue'
@@ -9,26 +9,28 @@ import ProfileView from './components/ProfileView.vue'
 import DashboardView from './components/DashboardView.vue'
 import GoalsView from './components/GoalsView.vue'
 import WorkoutReminder from './components/WorkoutReminder.vue'
+import AuthModal from './components/AuthModal.vue'
+import { useFirebase } from './composables/useFirebase'
+import { 
+  addWorkout as addWorkoutToFirebase, 
+  updateWorkout as updateWorkoutInFirebase, 
+  deleteWorkout as deleteWorkoutFromFirebase,
+  type Workout 
+} from './firebase/workoutService'
 
-const totalDuration = computed(() =>
-  workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
-);
-
-const workoutCount = computed(() => workouts.value.length);
-
-// Eine Liste für alle Workouts
-interface Workout {
-  type: string
-  category?: string
-  duration: number
-  date: string
-  notes?: string
-  trainingType?: string
-  sets?: number
-  reps?: number
-}
-
-const workouts = ref<Workout[]>([])
+// Firebase integration
+const { 
+  isAuthenticated, 
+  isLoading: firebaseLoading, 
+  user, 
+  workouts, 
+  workoutStats,
+  error: firebaseError,
+  clearError,
+  addWorkoutToLocal,
+  removeWorkoutFromLocal,
+  updateWorkoutInLocal
+} = useFirebase()
 
 // Navigation State
 const currentView = ref('dashboard')
@@ -40,131 +42,304 @@ const showReminders = ref(false)
 // Goals State
 const weeklyGoal = ref(4) // Default: 4 Workouts pro Woche
 
+/**
+ * Navigates to a specific view in the app
+ * @param view - The view name to navigate to
+ */
 function navigateToView(view: string) {
   currentView.value = view
 }
 
+/**
+ * Toggles the reminders modal visibility
+ */
 function toggleReminders() {
   showReminders.value = !showReminders.value
 }
 
+/**
+ * Updates the weekly workout goal
+ * @param newGoal - The new weekly goal number
+ */
 function updateWeeklyGoal(newGoal: number) {
   weeklyGoal.value = newGoal
 }
 
-// Funktion, um ein Workout hinzuzufügen
-function addWorkout(workout: Workout) {
-  workouts.value.push(workout)
+/**
+ * Adds a new workout to Firebase and updates local state optimistically
+ * @param workout - The workout data to add
+ */
+async function addWorkout(workout: Omit<Workout, 'id'>) {
+  if (!user.value) return
+
+  try {
+    // Add to local state immediately for better UX
+    const tempWorkout = { ...workout, id: 'temp-' + Date.now() }
+    addWorkoutToLocal(tempWorkout)
+
+    // Add to Firebase
+    const workoutId = await addWorkoutToFirebase(workout, user.value.uid)
+    
+    // Update local state with real ID
+    removeWorkoutFromLocal(tempWorkout.id!)
+    addWorkoutToLocal({ ...workout, id: workoutId })
+    
+  } catch (error) {
+    console.error('Error adding workout:', error)
+    // Remove from local state if Firebase add failed
+    removeWorkoutFromLocal('temp-' + (Date.now() - 1000))
+    alert('Fehler beim Hinzufügen des Workouts. Bitte versuchen Sie es erneut.')
+  }
 }
 
-function addWorkoutAndClose(workout: Workout) {
-  addWorkout(workout)
+/**
+ * Adds a workout and closes the modal
+ * @param workout - The workout data to add
+ */
+async function addWorkoutAndClose(workout: Omit<Workout, 'id'>) {
+  await addWorkout(workout)
   showAddWorkout.value = false
 }
 
-function deleteWorkout(index: number) {
-  workouts.value.splice(index, 1)
+/**
+ * Deletes a workout from Firebase and local state
+ * @param index - The index of the workout in the local array (for backward compatibility)
+ */
+async function deleteWorkout(index: number) {
+  const workout = workouts.value[index]
+  if (!workout?.id) return
+
+  try {
+    // Remove from local state immediately
+    removeWorkoutFromLocal(workout.id)
+    
+    // Remove from Firebase
+    await deleteWorkoutFromFirebase(workout.id)
+    
+  } catch (error) {
+    console.error('Error deleting workout:', error)
+    // Re-add to local state if Firebase delete failed
+    addWorkoutToLocal(workout)
+    alert('Fehler beim Löschen des Workouts. Bitte versuchen Sie es erneut.')
+  }
 }
 
-function updateWorkout(index: number, updatedWorkout: Workout) {
-  workouts.value[index] = updatedWorkout
+/**
+ * Updates a workout in Firebase and local state
+ * @param index - The index of the workout in the local array (for backward compatibility)
+ * @param updatedWorkout - The updated workout data
+ */
+async function updateWorkout(index: number, updatedWorkout: Workout) {
+  const workout = workouts.value[index]
+  if (!workout?.id) return
+
+  try {
+    // Update local state immediately
+    updateWorkoutInLocal(workout.id, updatedWorkout)
+    
+    // Update in Firebase
+    await updateWorkoutInFirebase(workout.id, updatedWorkout)
+    
+  } catch (error) {
+    console.error('Error updating workout:', error)
+    // Revert local state if Firebase update failed
+    updateWorkoutInLocal(workout.id, workout)
+    alert('Fehler beim Aktualisieren des Workouts. Bitte versuchen Sie es erneut.')
+  }
 }
 
+/**
+ * Handles when a new reminder is added
+ * @param reminder - The reminder data
+ */
 function handleReminderAdded(reminder: any) {
   console.log('Neue Erinnerung hinzugefügt:', reminder)
-  // Hier könnten wir weitere Aktionen durchführen, wenn eine Erinnerung hinzugefügt wird
+  // Additional actions can be performed here when a reminder is added
 }
-
-// Hilfsfunktionen für bessere Darstellung
-const averageDuration = computed(() => 
-  workouts.value.length > 0 ? Math.round(totalDuration.value / workouts.value.length) : 0
-)
+</script>
 </script>
 
 <template>
   <div class="app-container">
-    <AppHeader :currentView="currentView" @navigate="navigateToView" @toggleReminders="toggleReminders" />
+    <!-- Show authentication modal if user is not authenticated -->
+    <AuthModal v-if="!isAuthenticated && !firebaseLoading" />
     
-    <main class="app-main">
-      <div class="hero-section">
-        <h1 class="app-title">
-          <span class="app-icon">🏋️‍♂️</span>
-          Fitness-Tracker
-          <span class="app-subtitle">Deine persönliche Trainings-App</span>
-        </h1>
+    <!-- Show loading spinner while Firebase is initializing -->
+    <div v-else-if="firebaseLoading" class="loading-container">
+      <div class="loading-spinner">
+        <span class="spinner-icon">⏳</span>
+        <p>Lade Fitness-Tracker...</p>
       </div>
+    </div>
+    
+    <!-- Main app content (only show when authenticated) -->
+    <div v-else class="main-app">
+      <AppHeader :currentView="currentView" @navigate="navigateToView" @toggleReminders="toggleReminders" />
+      
+      <main class="app-main">
+        <div class="hero-section">
+          <h1 class="app-title">
+            <span class="app-icon">🏋️‍♂️</span>
+            Fitness-Tracker
+            <span class="app-subtitle">Deine persönliche Trainings-App</span>
+          </h1>
+        </div>
 
-      <!-- Dashboard View -->
-      <div v-if="currentView === 'dashboard'" class="content-section">
-        <DashboardView 
-          :workoutCount="workoutCount"
-          :totalDuration="totalDuration"
-          :workouts="workouts"
-          :weeklyGoal="weeklyGoal"
-          @showAddWorkout="showAddWorkout = true"
-          @navigateToWorkouts="navigateToView('workouts')"
-          @navigateToStatistics="navigateToView('statistics')"
-          @navigateToProfile="navigateToView('profile')"
-        />
-        
-        <!-- Add Workout Modal/Dialog -->
-        <div v-if="showAddWorkout" class="modal-overlay" @click="showAddWorkout = false">
-          <div class="modal-content" @click.stop>
-            <AddWorkout @add="addWorkoutAndClose" />
-            <button class="modal-close" @click="showAddWorkout = false">×</button>
+        <!-- Firebase Error Display -->
+        <div v-if="firebaseError" class="error-banner">
+          <span class="error-icon">⚠️</span>
+          {{ firebaseError }}
+          <button @click="clearError" class="close-error">×</button>
+        </div>
+
+        <!-- Dashboard View -->
+        <div v-if="currentView === 'dashboard'" class="content-section">
+          <DashboardView 
+            :workoutCount="workoutStats.count"
+            :totalDuration="workoutStats.totalDuration"
+            :workouts="workouts"
+            :weeklyGoal="weeklyGoal"
+            @showAddWorkout="showAddWorkout = true"
+            @navigateToWorkouts="navigateToView('workouts')"
+            @navigateToStatistics="navigateToView('statistics')"
+            @navigateToProfile="navigateToView('profile')"
+          />
+          
+          <!-- Add Workout Modal/Dialog -->
+          <div v-if="showAddWorkout" class="modal-overlay" @click="showAddWorkout = false">
+            <div class="modal-content" @click.stop>
+              <AddWorkout @add="addWorkoutAndClose" />
+              <button class="modal-close" @click="showAddWorkout = false">×</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Workouts View -->
-      <div v-else-if="currentView === 'workouts'" class="content-section">
-        <AddWorkout @add="addWorkout" />
+        <!-- Workouts View -->
+        <div v-else-if="currentView === 'workouts'" class="content-section">
+          <AddWorkout @add="addWorkout" />
 
-        <WorkoutList 
-          v-if="workouts.length > 0"
-          :workouts="workouts"
-          @delete="deleteWorkout"
-          @update="updateWorkout"
-        />
+          <WorkoutList 
+            v-if="workouts.length > 0"
+            :workouts="workouts"
+            @delete="deleteWorkout"
+            @update="updateWorkout"
+          />
 
-        <EmptyState v-else />
-      </div>
+          <EmptyState v-else />
+        </div>
 
-      <!-- Goals View -->
-      <div v-else-if="currentView === 'goals'" class="content-section">
-        <GoalsView 
-          :workouts="workouts"
-          :initialWeeklyGoal="weeklyGoal"
-          @updateWeeklyGoal="updateWeeklyGoal"
-        />
-      </div>
+        <!-- Goals View -->
+        <div v-else-if="currentView === 'goals'" class="content-section">
+          <GoalsView 
+            :workouts="workouts"
+            :initialWeeklyGoal="weeklyGoal"
+            @updateWeeklyGoal="updateWeeklyGoal"
+          />
+        </div>
 
-      <!-- Statistics View -->
-      <div v-else-if="currentView === 'statistics'" class="content-section">
-        <Statistics 
-          :workoutCount="workoutCount"
-          :totalDuration="totalDuration"
-          :averageDuration="averageDuration"
-          :workouts="workouts"
-        />
-      </div>
+        <!-- Statistics View -->
+        <div v-else-if="currentView === 'statistics'" class="content-section">
+          <Statistics 
+            :workoutCount="workoutStats.count"
+            :totalDuration="workoutStats.totalDuration"
+            :averageDuration="workoutStats.averageDuration"
+            :workouts="workouts"
+          />
+        </div>
 
-      <!-- Profile View -->
-      <div v-else-if="currentView === 'profile'" class="content-section">
-        <ProfileView />
-      </div>
-    </main>
+        <!-- Profile View -->
+        <div v-else-if="currentView === 'profile'" class="content-section">
+          <ProfileView />
+        </div>
+      </main>
 
-    <!-- Workout Reminder Modal -->
-    <WorkoutReminder 
-      :isOpen="showReminders" 
-      @close="showReminders = false"
-      @reminderAdded="handleReminderAdded"
-    />
+      <!-- Workout Reminder Modal -->
+      <WorkoutReminder 
+        :isOpen="showReminders" 
+        @close="showReminders = false"
+        @reminderAdded="handleReminderAdded"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Loading Container */
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.spinner-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+/* Error Banner */
+.error-banner {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 12px;
+  color: #ff3b30;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+}
+
+.close-error {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #ff3b30;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.close-error:hover {
+  opacity: 0.7;
+}
+
 /* Apple Design System - Minimalistische Eleganz */
 .app-container {
   min-height: 100vh;
