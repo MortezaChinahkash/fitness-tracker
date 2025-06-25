@@ -172,21 +172,24 @@ const welcomeSubtitle = computed(() => {
   const hour = new Date().getHours()
   
   if (hasWorkoutToday.value) {
-    if (hour < 12) return 'Du bist heute schon früh dran gewesen! 🌅'
-    if (hour < 17) return 'Du hast heute bereits trainiert! 🎉'
-    return 'Du hast den Tag sportlich abgeschlossen! 🌟'
+    if (hour < 12 && hour > 6) return 'Du bist heute schon früh dran gewesen! 🌅'
+    if (hour < 17 && hour > 12) return 'Du hast heute bereits trainiert! 🎉'
+    if (hour < 22 && hour > 17) return 'Du hast den Tag sportlich abgeschlossen! 🌟'
+    return 'Perfekt! Du hast heute trainiert. Zeit für Erholung 😴'
   }
   
   if (thisWeekWorkouts.value >= 3) {
-    if (hour < 12) return 'Du bist diese Woche schon richtig aktiv! Perfekter Start in den Tag.'
-    if (hour < 17) return 'Du bist diese Woche schon richtig aktiv!'
-    return 'Du bist diese Woche schon richtig aktiv! Zeit für das nächste Training?'
+    if (hour < 12 && hour > 6) return 'Du bist diese Woche schon richtig aktiv! Perfekter Start in den Tag.'
+    if (hour < 17 && hour > 12) return 'Du bist diese Woche schon richtig aktiv!'
+    if (hour < 22 && hour > 17) return 'Du bist diese Woche schon richtig aktiv! Zeit für das nächste Training?'
+    return 'Du warst diese Woche sehr aktiv! Gönn dir etwas Ruhe 🌙'
   }
   
-  if (hour < 12) return 'Ein perfekter Tag für ein Workout!'
-  if (hour < 17) return 'Zeit für ein energiegeladenes Training!'
-  if (hour < 20) return 'Noch Zeit für ein Workout heute!'
-  return 'Entspanntes Training zum Tagesausklang?'
+  if (hour < 12 && hour > 6) return 'Ein perfekter Tag für ein Workout!'
+  if (hour < 17 && hour > 12) return 'Zeit für ein energiegeladenes Training!'
+  if (hour < 20 && hour > 17) return 'Noch Zeit für ein Workout heute!'
+  if (hour < 22 && hour > 20) return 'Entspanntes Training zum Tagesausklang?'
+  return 'Zu spät für ein Training? Morgen ist ein neuer Tag! 🌙'
 })
 
 const welcomeIcon = computed(() => {
