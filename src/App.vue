@@ -8,6 +8,7 @@ import EmptyState from './components/EmptyState.vue'
 import ProfileView from './components/ProfileView.vue'
 import DashboardView from './components/DashboardView.vue'
 import GoalsView from './components/GoalsView.vue'
+import WorkoutReminder from './components/WorkoutReminder.vue'
 
 const totalDuration = computed(() =>
   workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
@@ -34,12 +35,17 @@ const currentView = ref('dashboard')
 
 // Modal State
 const showAddWorkout = ref(false)
+const showReminders = ref(false)
 
 // Goals State
 const weeklyGoal = ref(4) // Default: 4 Workouts pro Woche
 
 function navigateToView(view: string) {
   currentView.value = view
+}
+
+function toggleReminders() {
+  showReminders.value = !showReminders.value
 }
 
 function updateWeeklyGoal(newGoal: number) {
@@ -64,6 +70,11 @@ function updateWorkout(index: number, updatedWorkout: Workout) {
   workouts.value[index] = updatedWorkout
 }
 
+function handleReminderAdded(reminder: any) {
+  console.log('Neue Erinnerung hinzugefügt:', reminder)
+  // Hier könnten wir weitere Aktionen durchführen, wenn eine Erinnerung hinzugefügt wird
+}
+
 // Hilfsfunktionen für bessere Darstellung
 const averageDuration = computed(() => 
   workouts.value.length > 0 ? Math.round(totalDuration.value / workouts.value.length) : 0
@@ -72,7 +83,7 @@ const averageDuration = computed(() =>
 
 <template>
   <div class="app-container">
-    <AppHeader :currentView="currentView" @navigate="navigateToView" />
+    <AppHeader :currentView="currentView" @navigate="navigateToView" @toggleReminders="toggleReminders" />
     
     <main class="app-main">
       <div class="hero-section">
@@ -143,6 +154,13 @@ const averageDuration = computed(() =>
         <ProfileView />
       </div>
     </main>
+
+    <!-- Workout Reminder Modal -->
+    <WorkoutReminder 
+      :isOpen="showReminders" 
+      @close="showReminders = false"
+      @reminderAdded="handleReminderAdded"
+    />
   </div>
 </template>
 

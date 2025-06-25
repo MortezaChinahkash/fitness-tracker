@@ -211,6 +211,15 @@ onMounted(() => {
   transform: scale(1.05);
 }
 
+.notification-btn.active {
+  background: #007AFF;
+  color: white;
+}
+
+.notification-btn.active:hover {
+  background: #0056b3;
+}
+
 .notification-icon {
   font-size: 1.2rem;
 }
