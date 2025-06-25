@@ -87,10 +87,6 @@
 
     <!-- Quick Actions (Reduziert auf das Wichtigste) -->
     <div class="dashboard-actions">
-      <button class="action-primary" @click="$emit('showAddWorkout')">
-        <span>➕</span>
-        Neues Workout
-      </button>
       <button class="action-secondary" @click="$emit('navigateToStatistics')">
         <span>📊</span>
         Statistiken
@@ -539,12 +535,6 @@ function getDaysAgo(dateString: string): string {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
-/* Dashboard Actions */
-.dashboard-actions {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1rem;
-}
 
 .action-primary {
   background: #007AFF;
@@ -578,12 +568,12 @@ function getDaysAgo(dateString: string): string {
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   font-size: 0.9rem;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  width: 100%;
 }
 
 .action-secondary:hover {
