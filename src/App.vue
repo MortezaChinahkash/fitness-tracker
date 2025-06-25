@@ -143,6 +143,15 @@ function formatDate(dateString: string): string {
         <EmptyState v-else />
       </div>
 
+      <!-- Goals View -->
+      <div v-else-if="currentView === 'goals'" class="content-section">
+        <GoalsView 
+          :workouts="workouts"
+          :initialWeeklyGoal="weeklyGoal"
+          @updateWeeklyGoal="updateWeeklyGoal"
+        />
+      </div>
+
       <!-- Statistics View -->
       <div v-else-if="currentView === 'statistics'" class="content-section">
         <Statistics 
