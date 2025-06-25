@@ -164,7 +164,7 @@ const welcomeMessage = computed(() => {
   } else if (hour >= 17 && hour < 22) {
     return 'Guten Abend!'
   } else {
-    return 'Gute Nacht!'
+    return 'Gute Nacht! 🌙'
   }
 })
 
@@ -196,8 +196,8 @@ const welcomeIcon = computed(() => {
   if (hour >= 8 && hour < 12) return '☀️'     // Vormittag: Sonne
   if (hour >= 12 && hour < 17) return '🌞'    // Nachmittag: Helle Sonne
   if (hour >= 17 && hour < 19) return '🌇'    // Abends: Sonnenuntergang
-  if (hour >= 19 && hour < 22) return '�'    // Abend: Dämmerung
-  return '�🌙'                                  // Nacht: Mond
+  if (hour >= 19 && hour < 22) return '🌆'    // Abend: Dämmerung
+  return '🌙'                                  // Nacht: Mond
 })
 
 // Motivation
