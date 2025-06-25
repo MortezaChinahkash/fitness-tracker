@@ -29,7 +29,7 @@
               max="14" 
               class="goal-input"
             />
-            <button class="goal-btn" @click="increaseWeeklyGoal" :disabled="weeklyGoal >= 14">+</button>
+            <button class="goal-btn" @click="increaseWeeklyGoal" :disabled="weeklyGoal >= 7">+</button>
           </div>
           <p class="goal-suggestion">Empfohlen: 3-5 Workouts pro Woche</p>
         </div>
