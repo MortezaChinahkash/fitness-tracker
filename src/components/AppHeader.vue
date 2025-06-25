@@ -32,9 +32,9 @@
       </nav>
       
       <div class="header-right">
-        <button class="notification-btn">
+        <button class="notification-btn" @click="toggleReminders" :class="{ active: showReminders }">
           <span class="notification-icon">🔔</span>
-          <span class="notification-badge">3</span>
+          <span v-if="activeRemindersCount > 0" class="notification-badge">{{ activeRemindersCount }}</span>
         </button>
         <div class="user-avatar">
           <span class="avatar-text">JD</span>
@@ -45,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+
 // Props für den aktuellen View-Status
 interface Props {
   currentView?: string
@@ -53,9 +55,44 @@ interface Props {
 defineProps<Props>()
 
 // Events für Navigation
-defineEmits<{
+const emit = defineEmits<{
   navigate: [view: string]
+  toggleReminders: []
 }>()
+
+// Reminder State
+const showReminders = ref(false)
+const savedReminders = ref<any[]>([])
+
+// Computed
+const activeRemindersCount = computed(() => {
+  return savedReminders.value.filter(reminder => reminder.enabled).length
+})
+
+// Methods
+function toggleReminders() {
+  showReminders.value = !showReminders.value
+  emit('toggleReminders')
+}
+
+function loadReminders() {
+  const saved = localStorage.getItem('workout-reminders')
+  if (saved) {
+    savedReminders.value = JSON.parse(saved)
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  loadReminders()
+  
+  // Listen for reminder updates
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'workout-reminders') {
+      loadReminders()
+    }
+  })
+})
 </script>
 
 <style scoped>
