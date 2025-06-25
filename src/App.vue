@@ -7,6 +7,7 @@ import WorkoutList from './components/WorkoutList.vue'
 import EmptyState from './components/EmptyState.vue'
 import ProfileView from './components/ProfileView.vue'
 import DashboardView from './components/DashboardView.vue'
+import GoalsView from './components/GoalsView.vue'
 
 const totalDuration = computed(() =>
   workouts.value.reduce((sum, workout) => sum + Number(workout.duration), 0)
@@ -30,8 +31,15 @@ const currentView = ref('dashboard')
 // Modal State
 const showAddWorkout = ref(false)
 
+// Goals State
+const weeklyGoal = ref(4) // Default: 4 Workouts pro Woche
+
 function navigateToView(view: string) {
   currentView.value = view
+}
+
+function updateWeeklyGoal(newGoal: number) {
+  weeklyGoal.value = newGoal
 }
 
 // Funktion, um ein Workout hinzuzufügen
@@ -105,6 +113,7 @@ function formatDate(dateString: string): string {
           :workoutCount="workoutCount"
           :totalDuration="totalDuration"
           :workouts="workouts"
+          :weeklyGoal="weeklyGoal"
           @showAddWorkout="showAddWorkout = true"
           @navigateToWorkouts="navigateToView('workouts')"
           @navigateToStatistics="navigateToView('statistics')"

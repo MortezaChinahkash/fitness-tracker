@@ -17,6 +17,10 @@
           <span class="nav-icon">💪</span>
           Workouts
         </button>
+        <button @click="$emit('navigate', 'goals')" :class="['nav-link', { active: currentView === 'goals' }]">
+          <span class="nav-icon">🎯</span>
+          Ziele
+        </button>
         <button @click="$emit('navigate', 'statistics')" :class="['nav-link', { active: currentView === 'statistics' }]">
           <span class="nav-icon">📈</span>
           Statistiken

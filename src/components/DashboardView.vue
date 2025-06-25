@@ -109,6 +109,7 @@ interface Props {
   workoutCount: number
   totalDuration: number
   workouts: Workout[]
+  weeklyGoal?: number
 }
 
 const props = defineProps<Props>()
@@ -173,9 +174,9 @@ const motivationMessage = computed(() => {
 })
 
 // Wochenziel
-const weeklyGoal = 4 // 4 Workouts pro Woche als Ziel
-const goalProgress = computed(() => Math.min(100, Math.round((thisWeekWorkouts.value / weeklyGoal) * 100)))
-const remainingWorkouts = computed(() => Math.max(0, weeklyGoal - thisWeekWorkouts.value))
+const weeklyGoal = computed(() => props.weeklyGoal || 4) // 4 Workouts pro Woche als Standard
+const goalProgress = computed(() => Math.min(100, Math.round((thisWeekWorkouts.value / weeklyGoal.value) * 100)))
+const remainingWorkouts = computed(() => Math.max(0, weeklyGoal.value - thisWeekWorkouts.value))
 
 // Helper Functions
 function getWorkoutEmoji(type: string): string {
