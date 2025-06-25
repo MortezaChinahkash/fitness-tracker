@@ -9,17 +9,24 @@
     
     <form @submit.prevent="addWorkout" class="workout-form">
       <div class="input-group">
-        <label for="workout-type" class="input-label">
+        <label for="workout-category" class="input-label">
           <span class="label-icon">🏃‍♂️</span>
           Art des Workouts
         </label>
-        <input 
-          id="workout-type"
-          v-model="type" 
-          placeholder="z.B. Laufen, Krafttraining, Yoga..." 
-          required 
-          class="form-input"
-        />
+        <div class="category-selector">
+          <div class="categories-grid">
+            <button 
+              v-for="(emoji, category) in workoutCategories" 
+              :key="category"
+              type="button"
+              @click="selectCategory(category)"
+              :class="['category-btn', { active: selectedCategory === category }]"
+            >
+              <span class="category-emoji">{{ emoji }}</span>
+              <span class="category-name">{{ formatCategoryName(category) }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="input-group">
@@ -137,7 +144,6 @@
 import { ref, onMounted } from 'vue'
 
 // Reaktive Felder
-const type = ref('')
 const duration = ref(0)
 const date = ref('')
 const notes = ref('')
@@ -146,6 +152,25 @@ const notes = ref('')
 const trainingType = ref('duration') // 'duration' oder 'sets'
 const sets = ref(0)
 const reps = ref(0)
+
+// Kategorien
+const selectedCategory = ref('')
+
+// Workout-Kategorien mit Emojis
+const workoutCategories = {
+  'laufen': '🏃‍♂️',
+  'krafttraining': '💪',
+  'yoga': '🧘‍♀️',
+  'radfahren': '🚴‍♂️',
+  'schwimmen': '🏊‍♂️',
+  'wandern': '🥾',
+  'fußball': '⚽',
+  'basketball': '🏀',
+  'tennis': '🎾',
+  'boxen': '🥊',
+  'pilates': '🤸‍♀️',
+  'crossfit': '🏋️‍♀️'
+}
 
 // Das Event vorbereiten (damit wir Daten an die App schicken können)
 const emit = defineEmits(['add'])
@@ -160,8 +185,14 @@ onMounted(() => {
 })
 
 function addWorkout() {
+  if (!selectedCategory.value) {
+    alert('Bitte wähle eine Workout-Kategorie aus!')
+    return
+  }
+
   const workoutData = {
-    type: type.value,
+    type: selectedCategory.value,
+    category: selectedCategory.value,
     date: date.value,
     notes: notes.value,
     trainingType: trainingType.value
@@ -180,7 +211,7 @@ function addWorkout() {
   emit('add', workoutData);
 
   // Nach dem Hinzufügen Felder zurücksetzen, aber Datum auf heute lassen
-  type.value = '';
+  selectedCategory.value = '';
   duration.value = 0;
   sets.value = 0;
   reps.value = 0;
@@ -191,6 +222,15 @@ function addWorkout() {
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   date.value = `${year}-${month}-${day}`
+}
+
+// Kategorien-Funktionen
+function selectCategory(category: string) {
+  selectedCategory.value = category
+}
+
+function formatCategoryName(category: string): string {
+  return category.charAt(0).toUpperCase() + category.slice(1)
 }
 </script>
 
