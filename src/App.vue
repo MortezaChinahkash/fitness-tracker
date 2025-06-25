@@ -157,7 +157,6 @@ function handleReminderAdded(reminder: any) {
   // Additional actions can be performed here when a reminder is added
 }
 </script>
-</script>
 
 <template>
   <div class="app-container">
