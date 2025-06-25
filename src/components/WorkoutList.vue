@@ -2,8 +2,24 @@
   <div class="workouts-container">
     <h2 class="section-title">
       <span class="section-icon">📋</span>
-      Deine Workouts
-    </h2>
+    function getWorkoutEmoji(category: string): string {
+  const emojiMap: { [key: string]: string } = {
+    'laufen': '🏃',
+    'krafttraining': '💪',
+    'yoga': '🧘',
+    'radfahren': '🚴',
+    'schwimmen': '🏊',
+    'wandern': '🥾',
+    'fußball': '⚽',
+    'basketball': '🏀',
+    'tennis': '🎾',
+    'boxen': '🥊',
+    'pilates': '🤸',
+    'crossfit': '🏋️'
+  }
+  const key = category.toLowerCase()
+  return emojiMap[key] || '🏃'
+}    </h2>
     <div class="workouts-list">
       <div v-for="(workout, index) in workouts" :key="index" class="workout-card">
         <template v-if="editIndex === index">
@@ -78,6 +94,7 @@ import { ref } from 'vue'
 // Workout Interface
 interface Workout {
   type: string
+  category?: string
   duration: number
   date: string
   notes?: string

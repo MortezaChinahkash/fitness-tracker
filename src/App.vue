@@ -18,6 +18,7 @@ const workoutCount = computed(() => workouts.value.length);
 // Eine Liste für alle Workouts
 interface Workout {
   type: string
+  category?: string
   duration: number
   date: string
   notes?: string
@@ -67,34 +68,6 @@ function updateWorkout(index: number, updatedWorkout: Workout) {
 const averageDuration = computed(() => 
   workouts.value.length > 0 ? Math.round(totalDuration.value / workouts.value.length) : 0
 )
-
-function getWorkoutEmoji(type: string): string {
-  const emojiMap: { [key: string]: string } = {
-    'laufen': '🏃‍♂️',
-    'krafttraining': '💪',
-    'yoga': '🧘‍♀️',
-    'radfahren': '🚴‍♂️',
-    'schwimmen': '🏊‍♂️',
-    'wandern': '🥾',
-    'fußball': '⚽',
-    'basketball': '🏀',
-    'tennis': '🎾',
-    'boxen': '🥊',
-    'pilates': '🤸‍♀️',
-    'crossfit': '🏋️‍♀️'
-  }
-  const key = type.toLowerCase()
-  return emojiMap[key] || '🏃‍♂️'
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('de-DE', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric' 
-  })
-}
 </script>
 
 <template>

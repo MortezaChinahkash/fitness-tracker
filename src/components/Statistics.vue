@@ -327,7 +327,7 @@ const monthlyData = computed(() => {
   const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni']
   const currentYear = new Date().getFullYear()
   
-  return months.map((month, index) => {
+  return months.map((month) => {
     // Simulierte Daten - in einer echten App würden diese aus der Datenbank kommen
     const workouts = Math.floor(Math.random() * 20) + 5
     const duration = workouts * (45 + Math.floor(Math.random() * 30))

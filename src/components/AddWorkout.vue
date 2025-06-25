@@ -214,7 +214,7 @@ function addWorkout() {
     return
   }
 
-  const workoutData = {
+  const workoutData: any = {
     type: workoutType.value.trim(),
     category: selectedCategory.value,
     date: date.value,

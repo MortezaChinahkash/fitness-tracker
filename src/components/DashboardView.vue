@@ -60,7 +60,7 @@
         Letztes Training
       </h3>
       <div class="activity-card">
-        <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.category) }}</span>
+        <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.category || latestWorkout.type) }}</span>
         <div class="activity-content">
           <h4>{{ latestWorkout.type }}</h4>
           <p>
@@ -105,7 +105,7 @@
 import { computed } from 'vue'
 
 interface Workout {
-  category: string
+  category?: string
   type: string
   duration: number
   date: string
