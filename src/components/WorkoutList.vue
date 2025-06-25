@@ -52,7 +52,10 @@
           <div class="workout-details">
             <div class="workout-info">
               <span class="info-icon">⏱️</span>
-              <span>{{ workout.duration }} Minuten</span>
+              <span v-if="workout.trainingType === 'sets'">
+                {{ workout.sets }} Sets × {{ workout.reps }} Reps
+              </span>
+              <span v-else>{{ workout.duration }} Minuten</span>
             </div>
             <div class="workout-info">
               <span class="info-icon">📅</span>
@@ -78,6 +81,9 @@ interface Workout {
   duration: number
   date: string
   notes?: string
+  trainingType?: string
+  sets?: number
+  reps?: number
 }
 
 // Props

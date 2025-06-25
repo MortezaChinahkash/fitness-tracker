@@ -21,6 +21,9 @@ interface Workout {
   duration: number
   date: string
   notes?: string
+  trainingType?: string
+  sets?: number
+  reps?: number
 }
 
 const workouts = ref<Workout[]>([])

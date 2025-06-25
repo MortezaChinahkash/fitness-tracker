@@ -63,7 +63,13 @@
         <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.type) }}</span>
         <div class="activity-content">
           <h4>{{ latestWorkout.type }}</h4>
-          <p>{{ latestWorkout.duration }} Minuten • {{ getDaysAgo(latestWorkout.date) }}</p>
+          <p>
+            <span v-if="latestWorkout.trainingType === 'sets'">
+              {{ latestWorkout.sets }} Sets × {{ latestWorkout.reps }} Reps
+            </span>
+            <span v-else>{{ latestWorkout.duration }} Minuten</span>
+            • {{ getDaysAgo(latestWorkout.date) }}
+          </p>
         </div>
         <button class="view-more-btn" @click="$emit('navigateToWorkouts')">
           Alle anzeigen
@@ -103,6 +109,9 @@ interface Workout {
   duration: number
   date: string
   notes?: string
+  trainingType?: string
+  sets?: number
+  reps?: number
 }
 
 interface Props {

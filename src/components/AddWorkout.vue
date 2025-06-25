@@ -25,9 +25,31 @@
       <div class="input-group">
         <label for="workout-duration" class="input-label">
           <span class="label-icon">⏱️</span>
-          Dauer
+          Training
         </label>
-        <div class="input-with-unit">
+        
+        <!-- Typ-Auswahl -->
+        <div class="training-type-selector">
+          <button 
+            type="button"
+            @click="trainingType = 'duration'"
+            :class="['type-btn', { active: trainingType === 'duration' }]"
+          >
+            <span>⏱️</span>
+            Dauer
+          </button>
+          <button 
+            type="button"
+            @click="trainingType = 'sets'"
+            :class="['type-btn', { active: trainingType === 'sets' }]"
+          >
+            <span>🔢</span>
+            Sets/Reps
+          </button>
+        </div>
+
+        <!-- Dauer Input -->
+        <div v-if="trainingType === 'duration'" class="input-with-unit">
           <input 
             id="workout-duration"
             type="number" 
@@ -39,6 +61,37 @@
             max="480"
           />
           <span class="input-unit">Minuten</span>
+        </div>
+
+        <!-- Sets/Reps Input -->
+        <div v-else class="sets-input-group">
+          <div class="sets-row">
+            <div class="input-with-unit">
+              <input 
+                type="number" 
+                v-model="sets" 
+                placeholder="3" 
+                required 
+                class="form-input sets-input"
+                min="1"
+                max="20"
+              />
+              <span class="input-unit">Sets</span>
+            </div>
+            <div class="input-with-unit">
+              <input 
+                type="number" 
+                v-model="reps" 
+                placeholder="12" 
+                required 
+                class="form-input reps-input"
+                min="1"
+                max="100"
+              />
+              <span class="input-unit">Reps</span>
+            </div>
+          </div>
+          <p class="sets-example">z.B. 3 Sets à 12 Wiederholungen</p>
         </div>
       </div>
 
@@ -89,6 +142,11 @@ const duration = ref(0)
 const date = ref('')
 const notes = ref('')
 
+// Neue Felder für Sets/Reps
+const trainingType = ref('duration') // 'duration' oder 'sets'
+const sets = ref(0)
+const reps = ref(0)
+
 // Das Event vorbereiten (damit wir Daten an die App schicken können)
 const emit = defineEmits(['add'])
 
@@ -102,16 +160,30 @@ onMounted(() => {
 })
 
 function addWorkout() {
-  emit('add', {
+  const workoutData = {
     type: type.value,
-    duration: duration.value,
     date: date.value,
-    notes: notes.value
-  });
+    notes: notes.value,
+    trainingType: trainingType.value
+  }
+
+  // Je nach Trainingstyp verschiedene Daten hinzufügen
+  if (trainingType.value === 'duration') {
+    workoutData.duration = duration.value
+  } else {
+    workoutData.sets = sets.value
+    workoutData.reps = reps.value
+    // Für Kompatibilität: Schätze Dauer basierend auf Sets (ca. 2-3 Min pro Set)
+    workoutData.duration = Math.round(sets.value * 2.5)
+  }
+
+  emit('add', workoutData);
 
   // Nach dem Hinzufügen Felder zurücksetzen, aber Datum auf heute lassen
   type.value = '';
   duration.value = 0;
+  sets.value = 0;
+  reps.value = 0;
   notes.value = '';
   // Datum wieder auf heute setzen
   const today = new Date()
@@ -264,6 +336,72 @@ function addWorkout() {
   font-weight: 500;
   font-size: 0.9rem;
   pointer-events: none;
+}
+
+/* Training Type Selector */
+.training-type-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  background: #f5f5f7;
+  border-radius: 10px;
+  padding: 0.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.type-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #86868b;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+.type-btn.active {
+  background: #007AFF;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+}
+
+.type-btn:hover:not(.active) {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+
+/* Sets Input Group */
+.sets-input-group {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sets-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.sets-input,
+.reps-input {
+  padding-right: 3.5rem !important;
+}
+
+.sets-example {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #86868b;
+  font-style: italic;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .form-textarea {
