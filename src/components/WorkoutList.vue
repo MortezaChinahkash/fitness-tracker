@@ -10,7 +10,7 @@
           <!-- Bearbeitungsformular -->
           <div class="workout-header">
             <div class="workout-type">
-              <span class="workout-emoji">{{ getWorkoutEmoji(editWorkout!.type) }}</span>
+              <span class="workout-emoji">{{ getWorkoutEmoji(editWorkout!.category || editWorkout!.type) }}</span>
               <input v-model="editWorkout!.type" placeholder="Art des Workouts" required class="edit-input-title" />
             </div>
           </div>
@@ -37,7 +37,7 @@
         <template v-else>
           <div class="workout-header">
             <div class="workout-type">
-              <span class="workout-emoji">{{ getWorkoutEmoji(workout.type) }}</span>
+              <span class="workout-emoji">{{ getWorkoutEmoji(workout.category || workout.type) }}</span>
               <h3>{{ workout.type }}</h3>
             </div>
             <div class="action-buttons">

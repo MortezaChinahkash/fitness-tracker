@@ -60,7 +60,7 @@
         Letztes Training
       </h3>
       <div class="activity-card">
-        <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.type) }}</span>
+        <span class="activity-emoji">{{ getWorkoutEmoji(latestWorkout.category) }}</span>
         <div class="activity-content">
           <h4>{{ latestWorkout.type }}</h4>
           <p>
@@ -105,6 +105,7 @@
 import { computed } from 'vue'
 
 interface Workout {
+  category: string
   type: string
   duration: number
   date: string
@@ -164,7 +165,7 @@ const welcomeMessage = computed(() => {
   } else if (hour >= 17 && hour < 22) {
     return 'Guten Abend!'
   } else {
-    return 'Gute Nacht! 🌙'
+    return 'Gute Nacht!'
   }
 })
 
@@ -217,7 +218,7 @@ const goalProgress = computed(() => Math.min(100, Math.round((thisWeekWorkouts.v
 const remainingWorkouts = computed(() => Math.max(0, weeklyGoal.value - thisWeekWorkouts.value))
 
 // Helper Functions
-function getWorkoutEmoji(type: string): string {
+function getWorkoutEmoji(category: string): string {
   const emojiMap: { [key: string]: string } = {
     'laufen': '🏃‍♂️',
     'krafttraining': '💪',
@@ -232,7 +233,7 @@ function getWorkoutEmoji(type: string): string {
     'pilates': '🤸‍♀️',
     'crossfit': '🏋️‍♀️'
   }
-  const key = type.toLowerCase()
+  const key = category.toLowerCase()
   return emojiMap[key] || '🏃‍♂️'
 }
 

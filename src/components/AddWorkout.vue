@@ -10,23 +10,41 @@
     <form @submit.prevent="addWorkout" class="workout-form">
       <div class="input-group">
         <label for="workout-category" class="input-label">
-          <span class="label-icon">🏃‍♂️</span>
-          Art des Workouts
+          <span class="label-icon">📂</span>
+          Kategorie
         </label>
-        <div class="category-selector">
-          <div class="categories-grid">
-            <button 
+        <div class="select-wrapper">
+          <select 
+            id="workout-category"
+            v-model="selectedCategory" 
+            required 
+            class="form-select"
+          >
+            <option value="">Kategorie wählen...</option>
+            <option 
               v-for="(emoji, category) in workoutCategories" 
               :key="category"
-              type="button"
-              @click="selectCategory(category)"
-              :class="['category-btn', { active: selectedCategory === category }]"
+              :value="category"
             >
-              <span class="category-emoji">{{ emoji }}</span>
-              <span class="category-name">{{ formatCategoryName(category) }}</span>
-            </button>
-          </div>
+              {{ emoji }} {{ formatCategoryName(category) }}
+            </option>
+          </select>
         </div>
+      </div>
+
+      <div class="input-group">
+        <label for="workout-type" class="input-label">
+          <span class="label-icon">🏃‍♂️</span>
+          Workout-Name
+        </label>
+        <input 
+          id="workout-type"
+          type="text" 
+          v-model="workoutType" 
+          placeholder="z.B. Morgenrun, Krafttraining Oberkörper, Yoga Flow..."
+          required 
+          class="form-input"
+        />
       </div>
 
       <div class="input-group">
@@ -147,6 +165,7 @@ import { ref, onMounted } from 'vue'
 const duration = ref(0)
 const date = ref('')
 const notes = ref('')
+const workoutType = ref('')
 
 // Neue Felder für Sets/Reps
 const trainingType = ref('duration') // 'duration' oder 'sets'
@@ -190,8 +209,13 @@ function addWorkout() {
     return
   }
 
+  if (!workoutType.value.trim()) {
+    alert('Bitte gib einen Workout-Namen ein!')
+    return
+  }
+
   const workoutData = {
-    type: selectedCategory.value,
+    type: workoutType.value.trim(),
     category: selectedCategory.value,
     date: date.value,
     notes: notes.value,
@@ -212,6 +236,7 @@ function addWorkout() {
 
   // Nach dem Hinzufügen Felder zurücksetzen, aber Datum auf heute lassen
   selectedCategory.value = '';
+  workoutType.value = '';
   duration.value = 0;
   sets.value = 0;
   reps.value = 0;
@@ -225,10 +250,6 @@ function addWorkout() {
 }
 
 // Kategorien-Funktionen
-function selectCategory(category: string) {
-  selectedCategory.value = category
-}
-
 function formatCategoryName(category: string): string {
   return category.charAt(0).toUpperCase() + category.slice(1)
 }
@@ -328,7 +349,8 @@ function formatCategoryName(category: string): string {
 }
 
 .form-input,
-.form-textarea {
+.form-textarea,
+.form-select {
   width: 100%;
   padding: 0.875rem 1rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -344,18 +366,36 @@ function formatCategoryName(category: string): string {
   -webkit-font-smoothing: antialiased;
 }
 
+.select-wrapper {
+  position: relative;
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #86868b;
+  pointer-events: none;
+  font-size: 0.8rem;
+}
+
 .form-input:focus,
-.form-textarea:focus {
+.form-textarea:focus,
+.form-select:focus {
   border-color: #007AFF;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   transform: none;
-}
-
-.form-input::placeholder,
-.form-textarea::placeholder {
-  color: #86868b;
-  font-weight: 400;
 }
 
 .input-with-unit {
