@@ -144,25 +144,51 @@ const latestWorkout = computed(() => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 })
 
-// Welcome Message
+// Welcome Message - Detaillierte, uhrzeitabhängige Begrüßung
 const welcomeMessage = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 12) return 'Guten Morgen!'
-  if (hour < 18) return 'Guten Tag!'
-  return 'Guten Abend!'
+  
+  if (hour >= 5 && hour < 12) {
+    return 'Guten Morgen!'
+  } else if (hour >= 12 && hour < 17) {
+    return 'Guten Tag!'
+  } else if (hour >= 17 && hour < 22) {
+    return 'Guten Abend!'
+  } else {
+    return 'Gute Nacht!'
+  }
 })
 
 const welcomeSubtitle = computed(() => {
-  if (hasWorkoutToday.value) return 'Du hast heute bereits trainiert! 🎉'
-  if (thisWeekWorkouts.value >= 3) return 'Du bist diese Woche schon richtig aktiv!'
-  return 'Zeit für ein Workout!'
+  const hour = new Date().getHours()
+  
+  if (hasWorkoutToday.value) {
+    if (hour < 12) return 'Du bist heute schon früh dran gewesen! 🌅'
+    if (hour < 17) return 'Du hast heute bereits trainiert! 🎉'
+    return 'Du hast den Tag sportlich abgeschlossen! 🌟'
+  }
+  
+  if (thisWeekWorkouts.value >= 3) {
+    if (hour < 12) return 'Du bist diese Woche schon richtig aktiv! Perfekter Start in den Tag.'
+    if (hour < 17) return 'Du bist diese Woche schon richtig aktiv!'
+    return 'Du bist diese Woche schon richtig aktiv! Zeit für das nächste Training?'
+  }
+  
+  if (hour < 12) return 'Ein perfekter Tag für ein Workout!'
+  if (hour < 17) return 'Zeit für ein energiegeladenes Training!'
+  if (hour < 20) return 'Noch Zeit für ein Workout heute!'
+  return 'Entspanntes Training zum Tagesausklang?'
 })
 
 const welcomeIcon = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 12) return '🌅'
-  if (hour < 18) return '☀️'
-  return '🌙'
+  
+  if (hour >= 5 && hour < 8) return '🌅'      // Früh morgens: Sonnenaufgang
+  if (hour >= 8 && hour < 12) return '☀️'     // Vormittag: Sonne
+  if (hour >= 12 && hour < 17) return '🌞'    // Nachmittag: Helle Sonne
+  if (hour >= 17 && hour < 19) return '🌇'    // Abends: Sonnenuntergang
+  if (hour >= 19 && hour < 22) return '�'    // Abend: Dämmerung
+  return '�🌙'                                  // Nacht: Mond
 })
 
 // Motivation

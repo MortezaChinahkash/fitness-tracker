@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 // Reaktive Felder
 const type = ref('')
@@ -92,6 +92,15 @@ const notes = ref('')
 // Das Event vorbereiten (damit wir Daten an die App schicken können)
 const emit = defineEmits(['add'])
 
+// Aktuelles Datum beim Laden der Komponente setzen
+onMounted(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  date.value = `${year}-${month}-${day}`
+})
+
 function addWorkout() {
   emit('add', {
     type: type.value,
@@ -100,10 +109,16 @@ function addWorkout() {
     notes: notes.value
   });
 
+  // Nach dem Hinzufügen Felder zurücksetzen, aber Datum auf heute lassen
   type.value = '';
   duration.value = 0;
-  date.value = '';
   notes.value = '';
+  // Datum wieder auf heute setzen
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  date.value = `${year}-${month}-${day}`
 }
 </script>
 
