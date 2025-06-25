@@ -6,72 +6,406 @@
     </h2>
     
     <div class="profile-card">
-      <div class="profile-header">
-        <div class="profile-avatar">
-          <span class="avatar-large">👤</span>
+      <!-- Ansichtsmodus -->
+      <div v-if="!isEditing" class="profile-view">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <img v-if="profileData.avatar" :src="profileData.avatar" :alt="profileData.name" class="avatar-image" />
+            <span v-else class="avatar-large">{{ getInitials(profileData.name) }}</span>
+          </div>
+          <div class="profile-info">
+            <h3>{{ profileData.name }}</h3>
+            <p>{{ profileData.email }}</p>
+            <p class="member-since">Fitness-Enthusiast seit {{ memberSince }}</p>
+          </div>
+          <button class="edit-profile-btn" @click="startEditing">
+            <span>✏️</span>
+            Bearbeiten
+          </button>
         </div>
-        <div class="profile-info">
-          <h3>John Doe</h3>
-          <p>Fitness-Enthusiast seit 2023</p>
+        
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="stat-icon">🎯</span>
+            <div class="stat-content">
+              <div class="stat-number">156</div>
+              <div class="stat-label">Workouts absolviert</div>
+            </div>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-icon">🔥</span>
+            <div class="stat-content">
+              <div class="stat-number">2.340</div>
+              <div class="stat-label">Minuten trainiert</div>
+            </div>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-icon">📅</span>
+            <div class="stat-content">
+              <div class="stat-number">89</div>
+              <div class="stat-label">Tage aktiv</div>
+            </div>
+          </div>
         </div>
-        <button class="edit-profile-btn">
-          <span>✏️</span>
-          Bearbeiten
-        </button>
+        
+        <div class="profile-achievements">
+          <h4>Erfolge</h4>
+          <div class="achievements-grid">
+            <div class="achievement">
+              <span class="achievement-icon">🏆</span>
+              <span class="achievement-text">Erstes Workout</span>
+            </div>
+            <div class="achievement">
+              <span class="achievement-icon">💪</span>
+              <span class="achievement-text">10 Workouts</span>
+            </div>
+            <div class="achievement">
+              <span class="achievement-icon">🌟</span>
+              <span class="achievement-text">100 Workouts</span>
+            </div>
+            <div class="achievement locked">
+              <span class="achievement-icon">🎯</span>
+              <span class="achievement-text">365 Tage Streak</span>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="profile-stats">
-        <div class="profile-stat">
-          <span class="stat-icon">🎯</span>
-          <div class="stat-content">
-            <div class="stat-number">156</div>
-            <div class="stat-label">Workouts absolviert</div>
+
+      <!-- Bearbeitungsmodus -->
+      <div v-else class="profile-edit">
+        <div class="edit-header">
+          <h3>Profil bearbeiten</h3>
+          <div class="edit-actions">
+            <button class="cancel-btn" @click="cancelEditing">Abbrechen</button>
+            <button class="save-btn" @click="saveProfile" :disabled="!isFormValid">Speichern</button>
           </div>
         </div>
-        <div class="profile-stat">
-          <span class="stat-icon">🔥</span>
-          <div class="stat-content">
-            <div class="stat-number">2.340</div>
-            <div class="stat-label">Minuten trainiert</div>
+
+        <form @submit.prevent="saveProfile" class="edit-form">
+          <!-- Profilbild -->
+          <div class="form-group avatar-group">
+            <label class="form-label">Profilbild</label>
+            <div class="avatar-upload">
+              <div class="current-avatar">
+                <img v-if="editData.avatar" :src="editData.avatar" alt="Profilbild" class="avatar-preview" />
+                <div v-else class="avatar-placeholder">
+                  <span>{{ getInitials(editData.name) }}</span>
+                </div>
+              </div>
+              <div class="upload-controls">
+                <input 
+                  type="file" 
+                  ref="fileInput"
+                  @change="handleFileUpload" 
+                  accept="image/*"
+                  class="file-input"
+                  id="avatar-upload"
+                />
+                <label for="avatar-upload" class="upload-btn">
+                  <span>📷</span>
+                  Bild auswählen
+                </label>
+                <button v-if="editData.avatar" type="button" @click="removeAvatar" class="remove-btn">
+                  <span>🗑️</span>
+                  Entfernen
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="profile-stat">
-          <span class="stat-icon">📅</span>
-          <div class="stat-content">
-            <div class="stat-number">89</div>
-            <div class="stat-label">Tage aktiv</div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="name" class="form-label">
+              <span class="label-icon">👤</span>
+              Name
+            </label>
+            <input 
+              type="text" 
+              id="name"
+              v-model="editData.name" 
+              placeholder="Dein vollständiger Name"
+              required 
+              class="form-input"
+            />
           </div>
-        </div>
-      </div>
-      
-      <div class="profile-achievements">
-        <h4>Erfolge</h4>
-        <div class="achievements-grid">
-          <div class="achievement">
-            <span class="achievement-icon">🏆</span>
-            <span class="achievement-text">Erstes Workout</span>
+
+          <!-- E-Mail -->
+          <div class="form-group">
+            <label for="email" class="form-label">
+              <span class="label-icon">📧</span>
+              E-Mail-Adresse
+            </label>
+            <input 
+              type="email" 
+              id="email"
+              v-model="editData.email" 
+              placeholder="deine@email.com"
+              required 
+              class="form-input"
+            />
           </div>
-          <div class="achievement">
-            <span class="achievement-icon">💪</span>
-            <span class="achievement-text">10 Workouts</span>
+
+          <!-- Passwort ändern -->
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🔒</span>
+              Passwort ändern
+            </label>
+            
+            <!-- Aktuelles Passwort -->
+            <div class="password-field">
+              <input 
+                type="password" 
+                v-model="editData.currentPassword" 
+                placeholder="Aktuelles Passwort"
+                class="form-input"
+              />
+              <button type="button" @click="togglePasswordVisibility('current')" class="password-toggle">
+                <span>{{ showPasswords.current ? '👁️' : '👁️‍🗨️' }}</span>
+              </button>
+            </div>
+
+            <!-- Neues Passwort -->
+            <div class="password-field">
+              <input 
+                :type="showPasswords.new ? 'text' : 'password'"
+                v-model="editData.newPassword" 
+                placeholder="Neues Passwort (leer lassen wenn unverändert)"
+                class="form-input"
+              />
+              <button type="button" @click="togglePasswordVisibility('new')" class="password-toggle">
+                <span>{{ showPasswords.new ? '👁️' : '👁️‍🗨️' }}</span>
+              </button>
+            </div>
+
+            <!-- Passwort bestätigen -->
+            <div v-if="editData.newPassword" class="password-field">
+              <input 
+                :type="showPasswords.confirm ? 'text' : 'password'"
+                v-model="editData.confirmPassword" 
+                placeholder="Neues Passwort bestätigen"
+                class="form-input"
+                :class="{ 'error': editData.newPassword && editData.confirmPassword && editData.newPassword !== editData.confirmPassword }"
+              />
+              <button type="button" @click="togglePasswordVisibility('confirm')" class="password-toggle">
+                <span>{{ showPasswords.confirm ? '👁️' : '👁️‍🗨️' }}</span>
+              </button>
+            </div>
+
+            <!-- Passwort-Hinweise -->
+            <div v-if="editData.newPassword" class="password-hints">
+              <div class="hint" :class="{ valid: passwordValidation.length }">
+                {{ passwordValidation.length ? '✓' : '○' }} Mindestens 8 Zeichen
+              </div>
+              <div class="hint" :class="{ valid: passwordValidation.uppercase }">
+                {{ passwordValidation.uppercase ? '✓' : '○' }} Großbuchstabe
+              </div>
+              <div class="hint" :class="{ valid: passwordValidation.lowercase }">
+                {{ passwordValidation.lowercase ? '✓' : '○' }} Kleinbuchstabe
+              </div>
+              <div class="hint" :class="{ valid: passwordValidation.number }">
+                {{ passwordValidation.number ? '✓' : '○' }} Zahl
+              </div>
+              <div v-if="editData.confirmPassword" class="hint" :class="{ valid: editData.newPassword === editData.confirmPassword }">
+                {{ editData.newPassword === editData.confirmPassword ? '✓' : '○' }} Passwörter stimmen überein
+              </div>
+            </div>
           </div>
-          <div class="achievement">
-            <span class="achievement-icon">🌟</span>
-            <span class="achievement-text">100 Workouts</span>
-          </div>
-          <div class="achievement locked">
-            <span class="achievement-icon">🎯</span>
-            <span class="achievement-text">365 Tage Streak</span>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Statische Profil-Daten für Demo-Zwecke
-// In einer echten App würden diese aus einer Datenbank oder API kommen
+import { ref, computed, onMounted } from 'vue'
+
+interface ProfileData {
+  name: string
+  email: string
+  avatar?: string
+  memberSince: string
+}
+
+// Reactive Data
+const isEditing = ref(false)
+const fileInput = ref<HTMLInputElement>()
+
+const profileData = ref<ProfileData>({
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  avatar: '',
+  memberSince: '2023'
+})
+
+const editData = ref<ProfileData & {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}>({
+  name: '',
+  email: '',
+  avatar: '',
+  memberSince: '',
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const showPasswords = ref({
+  current: false,
+  new: false,
+  confirm: false
+})
+
+// Computed
+const memberSince = computed(() => {
+  return profileData.value.memberSince
+})
+
+const passwordValidation = computed(() => {
+  const password = editData.value.newPassword
+  return {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password)
+  }
+})
+
+const isPasswordValid = computed(() => {
+  if (!editData.value.newPassword) return true // Optional field
+  
+  const validation = passwordValidation.value
+  return validation.length && 
+         validation.uppercase && 
+         validation.lowercase && 
+         validation.number &&
+         (!editData.value.confirmPassword || editData.value.newPassword === editData.value.confirmPassword)
+})
+
+const isFormValid = computed(() => {
+  return editData.value.name.trim() && 
+         editData.value.email.trim() && 
+         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.value.email) &&
+         isPasswordValid.value
+})
+
+// Methods
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('')
+}
+
+function startEditing() {
+  isEditing.value = true
+  editData.value = {
+    ...profileData.value,
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+}
+
+function cancelEditing() {
+  isEditing.value = false
+  editData.value = {
+    name: '',
+    email: '',
+    avatar: '',
+    memberSince: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+}
+
+function togglePasswordVisibility(field: 'current' | 'new' | 'confirm') {
+  showPasswords.value[field] = !showPasswords.value[field]
+}
+
+function handleFileUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (file) {
+    // Dateigröße prüfen (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Die Datei ist zu groß. Bitte wählen Sie ein Bild unter 5MB.')
+      return
+    }
+
+    // Dateityp prüfen
+    if (!file.type.startsWith('image/')) {
+      alert('Bitte wählen Sie eine gültige Bilddatei.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      editData.value.avatar = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+function removeAvatar() {
+  editData.value.avatar = ''
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
+async function saveProfile() {
+  if (!isFormValid.value) return
+
+  try {
+    // Hier würden Sie normalerweise eine API aufrufen
+    // Für Demo-Zwecke speichern wir nur lokal
+    
+    // Passwort-Validierung (würde normalerweise serverseitig passieren)
+    if (editData.value.newPassword && !editData.value.currentPassword) {
+      alert('Bitte geben Sie Ihr aktuelles Passwort ein, um es zu ändern.')
+      return
+    }
+
+    // Profildaten aktualisieren
+    profileData.value = {
+      name: editData.value.name,
+      email: editData.value.email,
+      avatar: editData.value.avatar,
+      memberSince: profileData.value.memberSince
+    }
+
+    // In localStorage speichern für Persistenz
+    localStorage.setItem('fitness-profile', JSON.stringify(profileData.value))
+
+    // Erfolgreiche Speicherung
+    alert('Profil erfolgreich aktualisiert!')
+    isEditing.value = false
+
+  } catch (error) {
+    console.error('Fehler beim Speichern des Profils:', error)
+    alert('Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.')
+  }
+}
+
+function loadProfile() {
+  const saved = localStorage.getItem('fitness-profile')
+  if (saved) {
+    try {
+      profileData.value = { ...profileData.value, ...JSON.parse(saved) }
+    } catch (error) {
+      console.error('Fehler beim Laden des Profils:', error)
+    }
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  loadProfile()
+})
 </script>
 
 <style scoped>
