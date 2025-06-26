@@ -1,103 +1,206 @@
 <template>
   <div class="goals-container">
-    <!-- Weekly Goal Settings -->
-    <div class="weekly-goal-section">
-      <h2 class="section-title">
-        <span class="section-icon">🎯</span>
-        Wochenziel
-      </h2>
-      <div class="weekly-goal-card">
-        <div class="goal-current">
-          <div class="current-progress">
-            <span class="progress-number">{{ currentWeekWorkouts }}</span>
-            <span class="progress-separator">/</span>
-            <span class="goal-number">{{ weeklyGoal }}</span>
-          </div>
-          <p class="progress-label">Workouts diese Woche</p>
-          <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: weeklyProgress + '%' }"></div>
-          </div>
-        </div>
-        <div class="goal-settings">
-          <label class="goal-label">Wöchentliches Ziel:</label>
-          <div class="goal-input-group">
-            <button class="goal-btn" @click="decreaseWeeklyGoal" :disabled="weeklyGoal <= 1">-</button>
-            <input 
-              v-model.number="weeklyGoal" 
-              type="number" 
-              min="1" 
-              max="14" 
-              class="goal-input"
-            />
-            <button class="goal-btn" @click="increaseWeeklyGoal" :disabled="weeklyGoal >= 7">+</button>
-          </div>
-          <p class="goal-suggestion">Empfohlen: 3-5 Workouts pro Woche</p>
-        </div>
-      </div>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Ziele werden geladen...</p>
     </div>
 
-    <!-- Active Goals -->
-    <div class="active-goals-section">
-      <h2 class="section-title">
-        <span class="section-icon">🏆</span>
-        Aktive Ziele
-      </h2>
-      <div class="goals-grid">
-        <div 
-          v-for="goal in activeGoals" 
-          :key="goal.id" 
-          class="goal-card"
-          :class="{ 'completed': goal.completed }"
-        >
-          <div class="goal-header">
-            <span class="goal-emoji">{{ goal.emoji }}</span>
-            <div class="goal-info">
-              <h3>{{ goal.title }}</h3>
-              <p>{{ goal.description }}</p>
+    <!-- Content -->
+    <div v-else>
+      <!-- Weekly Goal Settings -->
+      <div class="weekly-goal-section">
+        <h2 class="section-title">
+          <span class="section-icon">🎯</span>
+          Wochenziel
+          <span v-if="isLiveUpdating" class="live-indicator">🔄</span>
+        </h2>
+        <div class="weekly-goal-card">
+          <div class="goal-current">
+            <div class="current-progress">
+              <span class="progress-number">{{ currentWeekWorkouts }}</span>
+              <span class="progress-separator">/</span>
+              <span class="goal-number">{{ weeklyGoal }}</span>
             </div>
-            <button 
-              class="goal-toggle"
-              @click="toggleGoal(goal.id)"
-              :class="{ 'active': goal.active }"
-            >
-              {{ goal.active ? '✓' : '○' }}
-            </button>
-          </div>
-          <div class="goal-progress" v-if="goal.active">
+            <p class="progress-label">Workouts diese Woche</p>
             <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: calculateProgress(goal) + '%' }"></div>
+              <div class="progress-fill" :style="{ width: weeklyProgress + '%' }"></div>
             </div>
-            <span class="progress-text">{{ getProgressText(goal) }}</span>
           </div>
+          <div class="goal-settings">
+            <label class="goal-label">Wöchentliches Ziel:</label>
+            <div class="goal-input-group">
+              <button class="goal-btn" @click="decreaseWeeklyGoal" :disabled="weeklyGoal <= 1 || isUpdatingWeeklyGoal">-</button>
+              <input 
+                v-model.number="weeklyGoal" 
+                type="number" 
+                min="1" 
+                max="14" 
+                class="goal-input"
+                @blur="saveWeeklyGoal"
+                :disabled="isUpdatingWeeklyGoal"
+              />
+              <button class="goal-btn" @click="increaseWeeklyGoal" :disabled="weeklyGoal >= 14 || isUpdatingWeeklyGoal">+</button>
+            </div>
+            <p class="goal-suggestion">Empfohlen: 3-5 Workouts pro Woche</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Goals -->
+      <div class="active-goals-section">
+        <h2 class="section-title">
+          <span class="section-icon">🏆</span>
+          Aktive Ziele
+          <span class="goals-count">({{ activeGoalsCount }})</span>
+        </h2>
+        
+        <div v-if="activeGoals.length === 0" class="empty-state">
+          <span class="empty-icon">🎯</span>
+          <h3>Keine aktiven Ziele</h3>
+          <p>Füge dein erstes Ziel hinzu, um motiviert zu bleiben!</p>
+        </div>
+        
+        <div v-else class="goals-grid">
+          <div 
+            v-for="goal in activeGoals" 
+            :key="goal.id" 
+            class="goal-card"
+            :class="{ 'completed': goal.completed }"
+          >
+            <div class="goal-header">
+              <span class="goal-emoji">{{ goal.emoji }}</span>
+              <div class="goal-info">
+                <h3>{{ goal.title }}</h3>
+                <p>{{ goal.description }}</p>
+              </div>
+              <button 
+                class="goal-toggle"
+                @click="toggleGoalActive(goal.id)"
+                :class="{ 'active': goal.active }"
+                :disabled="isUpdatingGoal"
+              >
+                {{ goal.active ? '✓' : '○' }}
+              </button>
+            </div>
+            <div class="goal-progress" v-if="goal.active">
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: calculateProgress(goal) + '%' }"></div>
+              </div>
+              <span class="progress-text">{{ getProgressText(goal) }}</span>
+              <div class="goal-actions">
+                <button 
+                  class="goal-action-btn delete-btn" 
+                  @click="deleteGoal(goal.id)"
+                  :disabled="isUpdatingGoal"
+                  title="Ziel löschen"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Templates -->
+      <div class="goal-templates-section">
+        <h2 class="section-title">
+          <span class="section-icon">✨</span>
+          Neue Ziele hinzufügen
+        </h2>
+        <div class="templates-grid">
+          <div 
+            v-for="template in goalTemplates" 
+            :key="template.id"
+            class="template-card"
+            @click="addGoalFromTemplate(template)"
+            :class="{ 'disabled': isUpdatingGoal }"
+          >
+            <span class="template-emoji">{{ template.emoji }}</span>
+            <div class="template-content">
+              <h4>{{ template.title }}</h4>
+              <p>{{ template.description }}</p>
+            </div>
+            <button class="add-btn" :disabled="isUpdatingGoal">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Goal Creator -->
+      <div class="custom-goal-section">
+        <h2 class="section-title">
+          <span class="section-icon">🎨</span>
+          Eigenes Ziel erstellen
+        </h2>
+        <div class="custom-goal-form">
+          <div class="form-row">
+            <label>Titel:</label>
+            <input 
+              v-model="customGoal.title" 
+              type="text" 
+              class="form-input" 
+              placeholder="z.B. 100km Laufen"
+              :disabled="isUpdatingGoal"
+            >
+          </div>
+          <div class="form-row">
+            <label>Beschreibung:</label>
+            <input 
+              v-model="customGoal.description" 
+              type="text" 
+              class="form-input" 
+              placeholder="z.B. In diesem Monat"
+              :disabled="isUpdatingGoal"
+            >
+          </div>
+          <div class="form-row">
+            <label>Ziel-Wert:</label>
+            <input 
+              v-model.number="customGoal.targetValue" 
+              type="number" 
+              class="form-input" 
+              placeholder="100"
+              :disabled="isUpdatingGoal"
+            >
+          </div>
+          <div class="form-row">
+            <label>Typ:</label>
+            <select v-model="customGoal.type" class="form-select" :disabled="isUpdatingGoal">
+              <option value="duration">Minuten</option>
+              <option value="count">Anzahl Workouts</option>
+              <option value="distance">Kilometer (falls verfügbar)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Emoji:</label>
+            <input 
+              v-model="customGoal.emoji" 
+              type="text" 
+              class="form-input emoji-input" 
+              placeholder="🎯"
+              :disabled="isUpdatingGoal"
+            >
+          </div>
+          <button 
+            @click="createCustomGoal" 
+            class="create-goal-btn"
+            :disabled="!canCreateCustomGoal || isUpdatingGoal"
+          >
+            {{ isUpdatingGoal ? 'Wird erstellt...' : 'Ziel erstellen' }}
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Goal Templates -->
-    <div class="goal-templates-section">
-      <h2 class="section-title">
-        <span class="section-icon">✨</span>
-        Neue Ziele hinzufügen
-      </h2>
-      <div class="templates-grid">
-        <div 
-          v-for="template in goalTemplates" 
-          :key="template.id"
-          class="template-card"
-          @click="addGoalFromTemplate(template)"
-        >
-          <span class="template-emoji">{{ template.emoji }}</span>
-          <div class="template-content">
-            <h4>{{ template.title }}</h4>
-            <p>{{ template.description }}</p>
-          </div>
-          <button class="add-btn">+</button>
-        </div>
-      </div>
+    <!-- Error State -->
+    <div v-if="error" class="error-state">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+      <button @click="reloadGoals" class="retry-btn">Erneut versuchen</button>
     </div>
-
-    <!-- Custom Goal Creator -->
-    <div class="custom-goal-section">
+  </div>
+</template>
       <h2 class="section-title">
         <span class="section-icon">🎨</span>
         Eigenes Ziel erstellen
@@ -140,166 +243,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { 
+  subscribeToGoals, 
+  getUserWeeklyGoal, 
+  updateUserWeeklyGoal,
+  addGoal,
+  deleteGoal as deleteGoalFromFirestore,
+  toggleGoalActive as toggleGoalActiveInFirestore,
+  getGoalTemplates,
+  createGoalFromTemplate,
+  calculateGoalProgress,
+  type Goal,
+  type GoalTemplate
+} from '../firebase/goalService'
+import { subscribeToUserWorkouts } from '../firebase/workoutService'
+import { getCurrentUser } from '../firebase/authService'
 
-interface Workout {
-  type: string
-  duration: number
-  date: string
-  notes?: string
-  trainingType?: string
-  sets?: number
-  reps?: number
-}
+// Reactive states
+const isLoading = ref(true)
+const isLiveUpdating = ref(false)
+const isUpdatingGoal = ref(false)
+const isUpdatingWeeklyGoal = ref(false)
+const error = ref<string | null>(null)
 
-interface Goal {
-  id: string
-  title: string
-  description: string
-  emoji: string
-  type: 'duration' | 'count' | 'distance'
-  targetValue: number
-  currentValue?: number
-  active: boolean
-  completed: boolean
-  createdAt: string
-  deadline?: string
-}
+// Data
+const goals = ref<Goal[]>([])
+const workouts = ref<any[]>([])
+const weeklyGoal = ref(4)
+const goalTemplates = ref<GoalTemplate[]>([])
 
-interface Props {
-  workouts: Workout[]
-  initialWeeklyGoal?: number
-}
+// Unsubscribe functions
+let unsubscribeGoals: (() => void) | null = null
+let unsubscribeWorkouts: (() => void) | null = null
 
-const props = defineProps<Props>()
-
-// Events
-const emit = defineEmits<{
-  updateWeeklyGoal: [number]
-}>()
-
-// Weekly Goal
-const weeklyGoal = ref(props.initialWeeklyGoal || 4)
-
-// Watch for changes and emit to parent
-watch(weeklyGoal, (newGoal) => {
-  emit('updateWeeklyGoal', newGoal)
-})
-
-const currentWeekWorkouts = computed(() => {
-  const now = new Date()
-  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
-  return props.workouts.filter(w => new Date(w.date) >= startOfWeek).length
-})
-
-const weeklyProgress = computed(() => {
-  return Math.min(100, Math.round((currentWeekWorkouts.value / weeklyGoal.value) * 100))
-})
-
-function increaseWeeklyGoal() {
-  if (weeklyGoal.value < 14) weeklyGoal.value++
-}
-
-function decreaseWeeklyGoal() {
-  if (weeklyGoal.value > 1) weeklyGoal.value--
-}
-
-// Goals Management
-const activeGoals = ref<Goal[]>([
-  {
-    id: '1',
-    title: '150 Minuten Training',
-    description: 'Diese Woche',
-    emoji: '⏰',
-    type: 'duration',
-    targetValue: 150,
-    active: true,
-    completed: false,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: '10 Workouts',
-    description: 'Diesen Monat',
-    emoji: '💪',
-    type: 'count',
-    targetValue: 10,
-    active: true,
-    completed: false,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '3',
-    title: '30-Tage-Challenge',
-    description: 'Jeden Tag aktiv sein',
-    emoji: '🔥',
-    type: 'count',
-    targetValue: 30,
-    active: false,
-    completed: false,
-    createdAt: new Date().toISOString()
-  }
-])
-
-// Goal Templates
-const goalTemplates = ref([
-  {
-    id: 't1',
-    title: '5km Lauf-Challenge',
-    description: '5 Läufe á 5km',
-    emoji: '🏃‍♂️',
-    type: 'count' as const,
-    targetValue: 5
-  },
-  {
-    id: 't2',
-    title: '300 Minuten Cardio',
-    description: 'In 2 Wochen',
-    emoji: '❤️',
-    type: 'duration' as const,
-    targetValue: 300
-  },
-  {
-    id: 't3',
-    title: 'Kraft-Woche',
-    description: '5 Krafttraining-Sessions',
-    emoji: '🏋️‍♀️',
-    type: 'count' as const,
-    targetValue: 5
-  },
-  {
-    id: 't4',
-    title: 'Yoga-Monat',
-    description: '15 Yoga-Sessions',
-    emoji: '🧘‍♀️',
-    type: 'count' as const,
-    targetValue: 15
-  },
-  {
-    id: 't5',
-    title: '500 Minuten Sport',
-    description: 'Diesen Monat',
-    emoji: '🎯',
-    type: 'duration' as const,
-    targetValue: 500
-  },
-  {
-    id: 't6',
-    title: 'Streak Master',
-    description: '7 Tage in Folge',
-    emoji: '🔥',
-    type: 'count' as const,
-    targetValue: 7
-  }
-])
-
-// Custom Goal
+// Custom Goal Form
 const customGoal = ref({
   title: '',
   description: '',
   emoji: '🎯',
   type: 'duration' as 'duration' | 'count' | 'distance',
   targetValue: 0
+})
+
+// Computed Properties
+const activeGoals = computed(() => goals.value.filter(goal => goal.active))
+const activeGoalsCount = computed(() => activeGoals.value.length)
+
+const currentWeekWorkouts = computed(() => {
+  const now = new Date()
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
+  return workouts.value.filter(w => new Date(w.date) >= startOfWeek).length
+})
+
+const weeklyProgress = computed(() => {
+  return Math.min(100, Math.round((currentWeekWorkouts.value / weeklyGoal.value) * 100))
 })
 
 const canCreateCustomGoal = computed(() => {
@@ -309,111 +307,187 @@ const canCreateCustomGoal = computed(() => {
 })
 
 // Functions
-function toggleGoal(goalId: string) {
-  const goal = activeGoals.value.find(g => g.id === goalId)
-  if (goal) {
-    goal.active = !goal.active
-  }
-}
-
 function calculateProgress(goal: Goal): number {
-  let currentValue = 0
-  
-  if (goal.type === 'duration') {
-    // Calculate total minutes based on timeframe
-    const now = new Date()
-    let startDate: Date
-    
-    if (goal.description.includes('Woche')) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
-    } else if (goal.description.includes('Monat')) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-    } else {
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // Default: last 7 days
-    }
-    
-    currentValue = props.workouts
-      .filter(w => new Date(w.date) >= startDate)
-      .reduce((sum, w) => sum + w.duration, 0)
-  } else if (goal.type === 'count') {
-    // Calculate workout count based on timeframe
-    const now = new Date()
-    let startDate: Date
-    
-    if (goal.description.includes('Woche')) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
-    } else if (goal.description.includes('Monat')) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-    } else if (goal.description.includes('30')) {
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    } else {
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // Default: last 7 days
-    }
-    
-    currentValue = props.workouts.filter(w => new Date(w.date) >= startDate).length
-  }
-  
-  goal.currentValue = currentValue
-  goal.completed = currentValue >= goal.targetValue
-  
-  return Math.min(100, Math.round((currentValue / goal.targetValue) * 100))
+  const { progress } = calculateGoalProgress(goal, workouts.value)
+  return progress
 }
 
 function getProgressText(goal: Goal): string {
-  const current = goal.currentValue || 0
+  const { currentValue } = calculateGoalProgress(goal, workouts.value)
   const target = goal.targetValue
   
   if (goal.type === 'duration') {
-    return `${current} / ${target} Minuten`
+    return `${currentValue} / ${target} Minuten`
   } else if (goal.type === 'count') {
-    return `${current} / ${target} Workouts`
+    return `${currentValue} / ${target} Workouts`
   } else {
-    return `${current} / ${target} km`
+    return `${currentValue} / ${target} km`
   }
 }
 
-function addGoalFromTemplate(template: any) {
-  const newGoal: Goal = {
-    id: 'goal_' + Date.now(),
-    title: template.title,
-    description: template.description,
-    emoji: template.emoji,
-    type: template.type,
-    targetValue: template.targetValue,
-    active: true,
-    completed: false,
-    createdAt: new Date().toISOString()
+async function increaseWeeklyGoal() {
+  if (weeklyGoal.value < 14 && !isUpdatingWeeklyGoal.value) {
+    weeklyGoal.value++
+    await saveWeeklyGoal()
   }
-  
-  activeGoals.value.push(newGoal)
 }
 
-function createCustomGoal() {
-  if (!canCreateCustomGoal.value) return
-  
-  const newGoal: Goal = {
-    id: 'custom_' + Date.now(),
-    title: customGoal.value.title,
-    description: customGoal.value.description,
-    emoji: customGoal.value.emoji,
-    type: customGoal.value.type,
-    targetValue: customGoal.value.targetValue,
-    active: true,
-    completed: false,
-    createdAt: new Date().toISOString()
-  }
-  
-  activeGoals.value.push(newGoal)
-  
-  // Reset form
-  customGoal.value = {
-    title: '',
-    description: '',
-    emoji: '🎯',
-    type: 'duration',
-    targetValue: 0
+async function decreaseWeeklyGoal() {
+  if (weeklyGoal.value > 1 && !isUpdatingWeeklyGoal.value) {
+    weeklyGoal.value--
+    await saveWeeklyGoal()
   }
 }
+
+async function saveWeeklyGoal() {
+  if (isUpdatingWeeklyGoal.value) return
+  
+  try {
+    isUpdatingWeeklyGoal.value = true
+    await updateUserWeeklyGoal(weeklyGoal.value)
+  } catch (err) {
+    console.error('Fehler beim Speichern des Wochenziels:', err)
+    error.value = 'Wochenziel konnte nicht gespeichert werden'
+  } finally {
+    isUpdatingWeeklyGoal.value = false
+  }
+}
+
+async function toggleGoalActive(goalId: string) {
+  if (isUpdatingGoal.value) return
+  
+  try {
+    isUpdatingGoal.value = true
+    await toggleGoalActiveInFirestore(goalId)
+  } catch (err) {
+    console.error('Fehler beim Umschalten des Ziel-Status:', err)
+    error.value = 'Ziel-Status konnte nicht geändert werden'
+  } finally {
+    isUpdatingGoal.value = false
+  }
+}
+
+async function deleteGoal(goalId: string) {
+  if (isUpdatingGoal.value) return
+  
+  if (!confirm('Möchtest du dieses Ziel wirklich löschen?')) {
+    return
+  }
+  
+  try {
+    isUpdatingGoal.value = true
+    await deleteGoalFromFirestore(goalId)
+  } catch (err) {
+    console.error('Fehler beim Löschen des Ziels:', err)
+    error.value = 'Ziel konnte nicht gelöscht werden'
+  } finally {
+    isUpdatingGoal.value = false
+  }
+}
+
+async function addGoalFromTemplate(template: GoalTemplate) {
+  if (isUpdatingGoal.value) return
+  
+  try {
+    isUpdatingGoal.value = true
+    await createGoalFromTemplate(template)
+  } catch (err) {
+    console.error('Fehler beim Hinzufügen des Ziels:', err)
+    error.value = 'Ziel konnte nicht hinzugefügt werden'
+  } finally {
+    isUpdatingGoal.value = false
+  }
+}
+
+async function createCustomGoal() {
+  if (!canCreateCustomGoal.value || isUpdatingGoal.value) return
+  
+  try {
+    isUpdatingGoal.value = true
+    
+    const goalData = {
+      title: customGoal.value.title,
+      description: customGoal.value.description,
+      emoji: customGoal.value.emoji,
+      type: customGoal.value.type,
+      targetValue: customGoal.value.targetValue,
+      currentValue: 0,
+      active: true,
+      completed: false
+    }
+    
+    await addGoal(goalData)
+    
+    // Reset form
+    customGoal.value = {
+      title: '',
+      description: '',
+      emoji: '🎯',
+      type: 'duration',
+      targetValue: 0
+    }
+  } catch (err) {
+    console.error('Fehler beim Erstellen des Ziels:', err)
+    error.value = 'Ziel konnte nicht erstellt werden'
+  } finally {
+    isUpdatingGoal.value = false
+  }
+}
+
+async function loadInitialData() {
+  try {
+    isLoading.value = true
+    error.value = null
+    
+    // Load goal templates
+    goalTemplates.value = getGoalTemplates()
+    
+    // Load weekly goal
+    weeklyGoal.value = await getUserWeeklyGoal()
+    
+  } catch (err) {
+    console.error('Fehler beim Laden der Daten:', err)
+    error.value = 'Daten konnten nicht geladen werden'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function setupRealtimeListeners() {
+  // Goals listener
+  unsubscribeGoals = subscribeToGoals((newGoals: Goal[]) => {
+    goals.value = newGoals
+    isLiveUpdating.value = true
+    setTimeout(() => {
+      isLiveUpdating.value = false
+    }, 1000)
+  })
+  
+  // Workouts listener for progress calculation
+  unsubscribeWorkouts = subscribeToUserWorkouts((newWorkouts: any[]) => {
+    workouts.value = newWorkouts
+  })
+}
+
+async function reloadGoals() {
+  await loadInitialData()
+  setupRealtimeListeners()
+}
+
+// Lifecycle
+onMounted(async () => {
+  await loadInitialData()
+  setupRealtimeListeners()
+})
+
+onUnmounted(() => {
+  if (unsubscribeGoals) {
+    unsubscribeGoals()
+  }
+  if (unsubscribeWorkouts) {
+    unsubscribeWorkouts()
+  }
+})
 </script>
 
 <style scoped>
