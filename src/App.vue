@@ -58,14 +58,6 @@ function toggleReminders() {
 }
 
 /**
- * Updates the weekly workout goal
- * @param newGoal - The new weekly goal number
- */
-function updateWeeklyGoal(newGoal: number) {
-  weeklyGoal.value = newGoal
-}
-
-/**
  * Adds a new workout to Firebase and updates local state optimistically
  * @param workout - The workout data to add
  */
@@ -229,11 +221,7 @@ function handleReminderAdded(reminder: any) {
 
         <!-- Goals View -->
         <div v-else-if="currentView === 'goals'" class="content-section">
-          <GoalsView 
-            :workouts="workouts"
-            :initialWeeklyGoal="weeklyGoal"
-            @updateWeeklyGoal="updateWeeklyGoal"
-          />
+          <GoalsView />
         </div>
 
         <!-- Statistics View -->

@@ -166,11 +166,13 @@ export async function getUserGoals(): Promise<Goal[]> {
 }
 
 export function subscribeToGoals(callback: (goals: Goal[]) => void): Unsubscribe {
-  const unsubscribe = async () => {
+  let unsubscribe: (() => void) | null = null
+  
+  const setupSubscription = async () => {
     const user = await getCurrentUser()
     if (!user) {
       callback([])
-      return () => {}
+      return
     }
 
     const goalsQuery = query(
@@ -179,7 +181,7 @@ export function subscribeToGoals(callback: (goals: Goal[]) => void): Unsubscribe
       orderBy('createdAt', 'desc')
     )
 
-    return onSnapshot(goalsQuery, (snapshot: QuerySnapshot) => {
+    unsubscribe = onSnapshot(goalsQuery, (snapshot: QuerySnapshot) => {
       const goals = snapshot.docs.map(doc => convertFirestoreGoal(doc))
       callback(goals)
     }, (error) => {
@@ -188,7 +190,13 @@ export function subscribeToGoals(callback: (goals: Goal[]) => void): Unsubscribe
     })
   }
 
-  return unsubscribe() as any
+  setupSubscription()
+
+  return () => {
+    if (unsubscribe) {
+      unsubscribe()
+    }
+  }
 }
 
 export async function addGoal(goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Goal> {

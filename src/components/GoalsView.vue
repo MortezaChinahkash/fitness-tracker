@@ -453,7 +453,7 @@ async function loadInitialData() {
   }
 }
 
-function setupRealtimeListeners() {
+async function setupRealtimeListeners() {
   // Goals listener
   unsubscribeGoals = subscribeToGoals((newGoals: Goal[]) => {
     goals.value = newGoals
@@ -464,9 +464,16 @@ function setupRealtimeListeners() {
   })
   
   // Workouts listener for progress calculation
-  unsubscribeWorkouts = subscribeToUserWorkouts((newWorkouts: any[]) => {
-    workouts.value = newWorkouts
-  })
+  try {
+    const user = await getCurrentUser()
+    if (user) {
+      unsubscribeWorkouts = subscribeToUserWorkouts(user.uid, (newWorkouts: any[]) => {
+        workouts.value = newWorkouts
+      })
+    }
+  } catch (error) {
+    console.error('Fehler beim Einrichten des Workout-Listeners:', error)
+  }
 }
 
 async function reloadGoals() {
@@ -894,5 +901,152 @@ onUnmounted(() => {
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Loading States */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #86868b;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e5ea;
+  border-top: 3px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Live Indicator */
+.live-indicator {
+  font-size: 0.8rem;
+  animation: pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Goals Count */
+.goals-count {
+  font-size: 0.9rem;
+  color: #86868b;
+  font-weight: 400;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #86868b;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #1d1d1f;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Goal Actions */
+.goal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.goal-action-btn {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.goal-action-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.goal-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+/* Template Card Disabled */
+.template-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.template-card.disabled:hover {
+  background: #f5f5f7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.error-state p {
+  margin: 0 0 1rem 0;
+  color: #d70015;
+  text-align: center;
+}
+
+.retry-btn {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #0056b3;
 }
 </style>
