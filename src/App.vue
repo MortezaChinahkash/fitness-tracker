@@ -238,12 +238,7 @@ function handleReminderAdded(reminder: any) {
 
         <!-- Statistics View -->
         <div v-else-if="currentView === 'statistics'" class="content-section">
-          <Statistics 
-            :workoutCount="workoutStats.count"
-            :totalDuration="workoutStats.totalDuration"
-            :averageDuration="workoutStats.averageDuration"
-            :workouts="workouts"
-          />
+          <Statistics />
         </div>
 
         <!-- Profile View -->

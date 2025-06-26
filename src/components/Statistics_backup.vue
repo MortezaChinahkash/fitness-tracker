@@ -205,12 +205,21 @@ import { db } from '../firebase/config'
 import { useFirebase } from '../composables/useFirebase'
 import type { Workout } from '../firebase/workoutService'
 
-// Props entfernt - alle Daten kommen jetzt direkt von Firebase
+interface Props {
+  workoutCount?: number
+  totalDuration?: number
+  averageDuration?: number
+  workouts?: Workout[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  workouts: () => []
+})
 
 // Firebase Integration für Live-Updates
 const { user } = useFirebase()
 const liveWorkouts = ref<Workout[]>([])
-const isLoading = ref(true) // Start with true, will be set to false when data loads or user not logged in
+const isLoading = ref(true)
 let unsubscribe: (() => void) | null = null
 
 // Live-Daten von Firebase abrufen
@@ -236,7 +245,6 @@ watch(user, (newUser) => {
   }
   
   if (newUser) {
-    isLoading.value = true
     setupRealtimeListener()
   } else {
     liveWorkouts.value = []
@@ -273,16 +281,30 @@ function setupRealtimeListener() {
   }
 }
 
-// Alle Daten kommen nur noch von Firebase - keine Props mehr
-const workouts = computed(() => liveWorkouts.value)
+// Kombinierte Workout-Daten (Props deaktivieren wenn Live-Daten verfügbar)
+const workouts = computed(() => {
+  // Nur Live-Daten verwenden wenn eingeloggt, ansonsten Props
+  return user.value ? liveWorkouts.value : (props.workouts || [])
+})
 
 // Live-berechnete Statistiken
-const workoutCount = computed(() => workouts.value.length)
+const liveWorkoutCount = computed(() => workouts.value.length)
+const liveTotalDuration = computed(() => 
+  workouts.value.reduce((sum, w) => sum + Number(w.duration || 0), 0)
+)
+const liveAverageDuration = computed(() => 
+  liveWorkoutCount.value > 0 ? Math.round(liveTotalDuration.value / liveWorkoutCount.value) : 0
+)
+
+// Verwende Live-Daten falls verfügbar, ansonsten Props
+const workoutCount = computed(() => 
+  user.value ? liveWorkoutCount.value : (props.workoutCount || 0)
+)
 const totalDuration = computed(() => 
-  workouts.value.reduce((sum: number, w: Workout) => sum + Number(w.duration || 0), 0)
+  user.value ? liveTotalDuration.value : (props.totalDuration || 0)
 )
 const averageDuration = computed(() => 
-  workoutCount.value > 0 ? Math.round(totalDuration.value / workoutCount.value) : 0
+  user.value ? liveAverageDuration.value : (props.averageDuration || 0)
 )
 
 // Helper Funktionen
@@ -306,26 +328,26 @@ const totalWeeks = computed(() => {
   if (workouts.value.length === 0) return 0
   
   // Alle Workout-Daten zu Date-Objekten konvertieren
-  const dates = workouts.value.map((w: Workout) => {
+  const dates = workouts.value.map(w => {
     // Firebase Timestamp zu Date konvertieren falls nötig
     if (w.createdAt && typeof w.createdAt.toDate === 'function') {
       return w.createdAt.toDate()
     }
     return new Date(w.date)
-  }).filter((d: Date) => !isNaN(d.getTime()))
+  }).filter(d => !isNaN(d.getTime()))
   
   if (dates.length === 0) return 0
   
-  const earliest = new Date(Math.min(...dates.map((d: Date) => d.getTime())))
-  const latest = new Date(Math.max(...dates.map((d: Date) => d.getTime())))
+  const earliest = new Date(Math.min(...dates.map(d => d.getTime())))
+  const latest = new Date(Math.max(...dates.map(d => d.getTime())))
   const weeksDiff = Math.ceil((latest.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24 * 7))
   return Math.max(1, weeksDiff)
 })
 
 // Trainingsintensität basierend auf echten Firebase-Daten
-const shortWorkouts = computed(() => workouts.value.filter((w: Workout) => Number(w.duration) < 30).length)
-const mediumWorkouts = computed(() => workouts.value.filter((w: Workout) => Number(w.duration) >= 30 && Number(w.duration) <= 60).length)
-const longWorkouts = computed(() => workouts.value.filter((w: Workout) => Number(w.duration) > 60).length)
+const shortWorkouts = computed(() => workouts.value.filter(w => Number(w.duration) < 30).length)
+const mediumWorkouts = computed(() => workouts.value.filter(w => Number(w.duration) >= 30 && Number(w.duration) <= 60).length)
+const longWorkouts = computed(() => workouts.value.filter(w => Number(w.duration) > 60).length)
 
 const shortWorkoutsPercentage = computed(() => workoutCount.value > 0 ? (shortWorkouts.value / workoutCount.value) * 100 : 0)
 const mediumWorkoutsPercentage = computed(() => workoutCount.value > 0 ? (mediumWorkouts.value / workoutCount.value) * 100 : 0)
@@ -336,7 +358,7 @@ const thisWeekWorkouts = computed(() => {
   const now = new Date()
   const startOfWeek = getStartOfWeek(now)
   
-  return workouts.value.filter((w: Workout) => {
+  return workouts.value.filter(w => {
     const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
       ? w.createdAt.toDate() 
       : new Date(w.date)
@@ -349,13 +371,13 @@ const thisWeekDuration = computed(() => {
   const startOfWeek = getStartOfWeek(now)
   
   return workouts.value
-    .filter((w: Workout) => {
+    .filter(w => {
       const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
         ? w.createdAt.toDate() 
         : new Date(w.date)
       return workoutDate >= startOfWeek
     })
-    .reduce((sum: number, w: Workout) => sum + Number(w.duration), 0)
+    .reduce((sum, w) => sum + Number(w.duration), 0)
 })
 
 const lastWeekWorkouts = computed(() => {
@@ -363,7 +385,7 @@ const lastWeekWorkouts = computed(() => {
   const startOfThisWeek = getStartOfWeek(now)
   const startOfLastWeek = new Date(startOfThisWeek.getTime() - 7 * 24 * 60 * 60 * 1000)
   
-  return workouts.value.filter((w: Workout) => {
+  return workouts.value.filter(w => {
     const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
       ? w.createdAt.toDate() 
       : new Date(w.date)
@@ -377,13 +399,13 @@ const lastWeekDuration = computed(() => {
   const startOfLastWeek = new Date(startOfThisWeek.getTime() - 7 * 24 * 60 * 60 * 1000)
   
   return workouts.value
-    .filter((w: Workout) => {
+    .filter(w => {
       const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
         ? w.createdAt.toDate() 
         : new Date(w.date)
       return workoutDate >= startOfLastWeek && workoutDate < startOfThisWeek
     })
-    .reduce((sum: number, w: Workout) => sum + Number(w.duration), 0)
+    .reduce((sum, w) => sum + Number(w.duration), 0)
 })
 
 const weeklyTrend = computed(() => {
@@ -393,7 +415,7 @@ const weeklyTrend = computed(() => {
 
 // Bestleistungen basierend auf echten Daten
 const longestWorkout = computed(() => {
-  return workouts.value.length > 0 ? Math.max(...workouts.value.map((w: Workout) => Number(w.duration))) : 0
+  return workouts.value.length > 0 ? Math.max(...workouts.value.map(w => Number(w.duration))) : 0
 })
 
 const bestWeek = computed(() => {
@@ -402,7 +424,7 @@ const bestWeek = computed(() => {
   // Workouts nach Wochen gruppieren
   const weeklyWorkouts: { [key: string]: number } = {}
   
-  workouts.value.forEach((w: Workout) => {
+  workouts.value.forEach(w => {
     const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
       ? w.createdAt.toDate() 
       : new Date(w.date)
@@ -483,7 +505,7 @@ const topWorkoutTypes = computed(() => {
     'basketball': '🏀',
     'tennis': '🎾',
     'boxen': '🥊',
-    'boxing': '🥊',
+    'boxing': '�',
     'crossfit': '🏋️‍♀️',
     'hiit': '🔥',
     'stretching': '🤸‍♀️',
