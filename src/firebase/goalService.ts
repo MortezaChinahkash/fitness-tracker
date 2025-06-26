@@ -8,7 +8,6 @@ import {
   onSnapshot, 
   query, 
   where, 
-  orderBy, 
   Timestamp,
   QuerySnapshot
 } from 'firebase/firestore'
@@ -153,12 +152,14 @@ export async function getUserGoals(): Promise<Goal[]> {
   try {
     const goalsQuery = query(
       collection(db, 'goals'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', user.uid)
     )
     
     const snapshot = await getDocs(goalsQuery)
-    return snapshot.docs.map(doc => convertFirestoreGoal(doc))
+    const goals = snapshot.docs.map(doc => convertFirestoreGoal(doc))
+    
+    // Sort by createdAt in JavaScript instead of Firestore
+    return goals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch (error) {
     console.error('Fehler beim Laden der Ziele:', error)
     throw new Error('Ziele konnten nicht geladen werden')
@@ -177,13 +178,14 @@ export function subscribeToGoals(callback: (goals: Goal[]) => void): Unsubscribe
 
     const goalsQuery = query(
       collection(db, 'goals'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', user.uid)
     )
 
     unsubscribe = onSnapshot(goalsQuery, (snapshot: QuerySnapshot) => {
       const goals = snapshot.docs.map(doc => convertFirestoreGoal(doc))
-      callback(goals)
+      // Sort by createdAt in JavaScript instead of Firestore
+      const sortedGoals = goals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      callback(sortedGoals)
     }, (error) => {
       console.error('Fehler beim Überwachen der Ziele:', error)
       callback([])

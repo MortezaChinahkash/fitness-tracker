@@ -201,46 +201,6 @@
     </div>
   </div>
 </template>
-      <h2 class="section-title">
-        <span class="section-icon">🎨</span>
-        Eigenes Ziel erstellen
-      </h2>
-      <div class="custom-goal-form">
-        <div class="form-row">
-          <label>Titel:</label>
-          <input v-model="customGoal.title" type="text" class="form-input" placeholder="z.B. 100km Laufen">
-        </div>
-        <div class="form-row">
-          <label>Beschreibung:</label>
-          <input v-model="customGoal.description" type="text" class="form-input" placeholder="z.B. In diesem Monat">
-        </div>
-        <div class="form-row">
-          <label>Ziel-Wert:</label>
-          <input v-model.number="customGoal.targetValue" type="number" class="form-input" placeholder="100">
-        </div>
-        <div class="form-row">
-          <label>Typ:</label>
-          <select v-model="customGoal.type" class="form-select">
-            <option value="duration">Minuten</option>
-            <option value="count">Anzahl Workouts</option>
-            <option value="distance">Kilometer (falls verfügbar)</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Emoji:</label>
-          <input v-model="customGoal.emoji" type="text" class="form-input emoji-input" placeholder="🎯">
-        </div>
-        <button 
-          @click="createCustomGoal" 
-          class="create-goal-btn"
-          :disabled="!canCreateCustomGoal"
-        >
-          Ziel erstellen
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'

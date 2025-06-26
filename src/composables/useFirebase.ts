@@ -20,7 +20,7 @@ import {
   getUserProfile, 
   type UserProfileData 
 } from '../firebase/userProfileService'
-import { getProfilePicture } from '../firebase/storageNoCORS'
+// Firebase services imports
 
 export function useFirebase() {
   // Authentication state
