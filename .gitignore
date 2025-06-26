@@ -22,3 +22,91 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase Configuration & Security - WICHTIG: Niemals committen!
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase spezifische Dateien
+firebase.json
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+
+# Firebase Hosting Cache
+.firebase/
+.firebase-cache/
+
+# Firebase Functions
+functions/node_modules/
+functions/.env
+functions/.env.local
+functions/lib/
+functions/dist/
+
+# Firebase Admin SDK Keys - KRITISCH: Niemals committen!
+*-firebase-adminsdk-*.json
+service-account-key.json
+serviceAccountKey.json
+firebase-service-account.json
+
+# Firebase Emulator Daten
+firebase-emulator-data/
+firestore-debug.log
+database-debug.log
+ui-debug.log
+auth-debug.log
+storage-debug.log
+functions-debug.log
+pubsub-debug.log
+
+# Firebase Config Dateien (falls sie sensible Daten enthalten)
+src/firebase/config.ts
+src/firebase/config.js
+src/firebase/config.local.ts
+firebase-config.js
+firebase-config.ts
+
+# Firebase Security Rules (optional - nur wenn sie sensible Logik enthalten)
+# firestore.rules
+# storage.rules
+# database.rules
+
+# API Keys und Secrets - NIEMALS COMMITTEN!
+api-keys.json
+secrets.json
+.secrets
+*.key
+*.pem
+
+# Build artifacts mit Firebase
+build/
+.firebase-cache/
+
+# Backup files
+*.backup
+*.bak
+
+# OS generierte Dateien
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+desktop.ini
+
+# Firebase CLI
+.firebase-tools-instant-win.exe
+
+# Firebase Extensions
+extensions/
+
+# Firebase Crashlytics
+crashlytics-build.properties
