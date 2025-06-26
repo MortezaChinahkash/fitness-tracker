@@ -190,16 +190,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-
-interface Workout {
-  type: string
-  duration: number
-  date: string
-  notes?: string
-  trainingType?: string
-  sets?: number
-  reps?: number
-}
+import type { Workout } from '../firebase/workoutService'
 
 interface Props {
   workoutCount: number
@@ -212,60 +203,105 @@ const props = withDefaults(defineProps<Props>(), {
   workouts: () => []
 })
 
-// Erweiterte Berechnungen
+// Helper Funktionen
+function getStartOfWeek(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day
+  return new Date(d.setDate(diff))
+}
+
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+}
+
+// Erweiterte Firebase-basierte Berechnungen
 const totalWeeks = computed(() => {
   if (props.workouts.length === 0) return 0
-  const dates = props.workouts.map(w => new Date(w.date))
+  
+  // Alle Workout-Daten zu Date-Objekten konvertieren
+  const dates = props.workouts.map(w => {
+    // Firebase Timestamp zu Date konvertieren falls nötig
+    if (w.createdAt && typeof w.createdAt.toDate === 'function') {
+      return w.createdAt.toDate()
+    }
+    return new Date(w.date)
+  }).filter(d => !isNaN(d.getTime()))
+  
+  if (dates.length === 0) return 0
+  
   const earliest = new Date(Math.min(...dates.map(d => d.getTime())))
   const latest = new Date(Math.max(...dates.map(d => d.getTime())))
   const weeksDiff = Math.ceil((latest.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24 * 7))
   return Math.max(1, weeksDiff)
 })
 
-// Trainingsintensität
-const shortWorkouts = computed(() => props.workouts.filter(w => w.duration < 30).length)
-const mediumWorkouts = computed(() => props.workouts.filter(w => w.duration >= 30 && w.duration <= 60).length)
-const longWorkouts = computed(() => props.workouts.filter(w => w.duration > 60).length)
+// Trainingsintensität basierend auf echten Firebase-Daten
+const shortWorkouts = computed(() => props.workouts.filter(w => Number(w.duration) < 30).length)
+const mediumWorkouts = computed(() => props.workouts.filter(w => Number(w.duration) >= 30 && Number(w.duration) <= 60).length)
+const longWorkouts = computed(() => props.workouts.filter(w => Number(w.duration) > 60).length)
 
 const shortWorkoutsPercentage = computed(() => props.workoutCount > 0 ? (shortWorkouts.value / props.workoutCount) * 100 : 0)
 const mediumWorkoutsPercentage = computed(() => props.workoutCount > 0 ? (mediumWorkouts.value / props.workoutCount) * 100 : 0)
 const longWorkoutsPercentage = computed(() => props.workoutCount > 0 ? (longWorkouts.value / props.workoutCount) * 100 : 0)
 
-// Wochenstatistik
+// Wochenstatistik mit korrekter Datumsbehandlung
 const thisWeekWorkouts = computed(() => {
   const now = new Date()
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()))
-  return props.workouts.filter(w => new Date(w.date) >= startOfWeek).length
+  const startOfWeek = getStartOfWeek(now)
+  
+  return props.workouts.filter(w => {
+    const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+      ? w.createdAt.toDate() 
+      : new Date(w.date)
+    return workoutDate >= startOfWeek
+  }).length
 })
 
 const thisWeekDuration = computed(() => {
   const now = new Date()
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()))
+  const startOfWeek = getStartOfWeek(now)
+  
   return props.workouts
-    .filter(w => new Date(w.date) >= startOfWeek)
-    .reduce((sum, w) => sum + w.duration, 0)
+    .filter(w => {
+      const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+        ? w.createdAt.toDate() 
+        : new Date(w.date)
+      return workoutDate >= startOfWeek
+    })
+    .reduce((sum, w) => sum + Number(w.duration), 0)
 })
 
 const lastWeekWorkouts = computed(() => {
   const now = new Date()
-  const startOfLastWeek = new Date(now.setDate(now.getDate() - now.getDay() - 7))
-  const endOfLastWeek = new Date(now.setDate(now.getDate() - now.getDay()))
+  const startOfThisWeek = getStartOfWeek(now)
+  const startOfLastWeek = new Date(startOfThisWeek.getTime() - 7 * 24 * 60 * 60 * 1000)
+  
   return props.workouts.filter(w => {
-    const date = new Date(w.date)
-    return date >= startOfLastWeek && date < endOfLastWeek
+    const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+      ? w.createdAt.toDate() 
+      : new Date(w.date)
+    return workoutDate >= startOfLastWeek && workoutDate < startOfThisWeek
   }).length
 })
 
 const lastWeekDuration = computed(() => {
   const now = new Date()
-  const startOfLastWeek = new Date(now.setDate(now.getDate() - now.getDay() - 7))
-  const endOfLastWeek = new Date(now.setDate(now.getDate() - now.getDay()))
+  const startOfThisWeek = getStartOfWeek(now)
+  const startOfLastWeek = new Date(startOfThisWeek.getTime() - 7 * 24 * 60 * 60 * 1000)
+  
   return props.workouts
     .filter(w => {
-      const date = new Date(w.date)
-      return date >= startOfLastWeek && date < endOfLastWeek
+      const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+        ? w.createdAt.toDate() 
+        : new Date(w.date)
+      return workoutDate >= startOfLastWeek && workoutDate < startOfThisWeek
     })
-    .reduce((sum, w) => sum + w.duration, 0)
+    .reduce((sum, w) => sum + Number(w.duration), 0)
 })
 
 const weeklyTrend = computed(() => {
@@ -273,42 +309,105 @@ const weeklyTrend = computed(() => {
   return Math.round(((thisWeekWorkouts.value - lastWeekWorkouts.value) / lastWeekWorkouts.value) * 100)
 })
 
-// Bestleistungen
+// Bestleistungen basierend auf echten Daten
 const longestWorkout = computed(() => {
-  return props.workouts.length > 0 ? Math.max(...props.workouts.map(w => w.duration)) : 0
+  return props.workouts.length > 0 ? Math.max(...props.workouts.map(w => Number(w.duration))) : 0
 })
 
 const bestWeek = computed(() => {
-  // Simuliert die beste Woche (in einer echten App würde das aus historischen Daten berechnet)
-  return Math.max(7, Math.ceil(props.workoutCount / totalWeeks.value * 1.5))
+  if (props.workouts.length === 0) return 0
+  
+  // Workouts nach Wochen gruppieren
+  const weeklyWorkouts: { [key: string]: number } = {}
+  
+  props.workouts.forEach(w => {
+    const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+      ? w.createdAt.toDate() 
+      : new Date(w.date)
+    
+    const weekKey = `${workoutDate.getFullYear()}-W${getWeekNumber(workoutDate)}`
+    weeklyWorkouts[weekKey] = (weeklyWorkouts[weekKey] || 0) + 1
+  })
+  
+  return Object.values(weeklyWorkouts).length > 0 ? Math.max(...Object.values(weeklyWorkouts)) : 0
 })
 
 const longestStreak = computed(() => {
-  // Simuliert die längste Serie (vereinfachte Berechnung)
-  return Math.min(14, Math.ceil(props.workoutCount / 3))
+  if (props.workouts.length === 0) return 0
+  
+  // Workouts nach Datum sortieren
+  const sortedWorkouts = [...props.workouts].sort((a, b) => {
+    const dateA = a.createdAt && typeof a.createdAt.toDate === 'function' 
+      ? a.createdAt.toDate() 
+      : new Date(a.date)
+    const dateB = b.createdAt && typeof b.createdAt.toDate === 'function' 
+      ? b.createdAt.toDate() 
+      : new Date(b.date)
+    return dateA.getTime() - dateB.getTime()
+  })
+  
+  // Einzigartige Tage extrahieren
+  const workoutDays = [...new Set(sortedWorkouts.map(w => {
+    const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+      ? w.createdAt.toDate() 
+      : new Date(w.date)
+    return workoutDate.toDateString()
+  }))].map(d => new Date(d)).sort((a, b) => a.getTime() - b.getTime())
+  
+  let maxStreak = 0
+  let currentStreak = 1
+  
+  for (let i = 1; i < workoutDays.length; i++) {
+    const daysDiff = Math.floor((workoutDays[i].getTime() - workoutDays[i-1].getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (daysDiff === 1) {
+      currentStreak++
+    } else {
+      maxStreak = Math.max(maxStreak, currentStreak)
+      currentStreak = 1
+    }
+  }
+  
+  return Math.max(maxStreak, currentStreak)
 })
 
-// Workout-Arten Analyse
+// Workout-Arten Analyse mit verbesserter Kategorisierung
 const topWorkoutTypes = computed(() => {
   const typeCount: { [key: string]: number } = {}
+  
   props.workouts.forEach(w => {
-    const type = w.type.toLowerCase()
+    // Kategorie verwenden falls vorhanden, ansonsten Type
+    const type = (w.category || w.type).toLowerCase()
     typeCount[type] = (typeCount[type] || 0) + 1
   })
 
   const emojiMap: { [key: string]: string } = {
+    'cardio': '🏃‍♂️',
     'laufen': '🏃‍♂️',
+    'joggen': '🏃‍♂️',
     'krafttraining': '💪',
+    'kraft': '💪',
+    'gewichte': '🏋️‍♀️',
     'yoga': '🧘‍♀️',
+    'pilates': '🤸‍♀️',
     'radfahren': '🚴‍♂️',
+    'cycling': '🚴‍♂️',
     'schwimmen': '🏊‍♂️',
+    'swimming': '🏊‍♀️',
     'wandern': '🥾',
+    'hiking': '🥾',
     'fußball': '⚽',
+    'football': '⚽',
     'basketball': '🏀',
     'tennis': '🎾',
     'boxen': '🥊',
-    'pilates': '🤸‍♀️',
-    'crossfit': '🏋️‍♀️'
+    'boxing': '�',
+    'crossfit': '🏋️‍♀️',
+    'hiit': '🔥',
+    'stretching': '🤸‍♀️',
+    'dehnen': '🤸‍♀️',
+    'functional': '⚡',
+    'bodyweight': '🏃‍♂️'
   }
 
   return Object.entries(typeCount)
@@ -322,20 +421,43 @@ const topWorkoutTypes = computed(() => {
     .slice(0, 5)
 })
 
-// Monatliche Daten
+// Monatliche Daten basierend auf echten Firebase-Daten
 const monthlyData = computed(() => {
-  const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni']
-  const currentYear = new Date().getFullYear()
+  const monthNames = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ]
   
-  return months.map((month) => {
-    // Simulierte Daten - in einer echten App würden diese aus der Datenbank kommen
-    const workouts = Math.floor(Math.random() * 20) + 5
-    const duration = workouts * (45 + Math.floor(Math.random() * 30))
-    const progress = Math.min(100, (workouts / 20) * 100)
+  const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth()
+  
+  // Letzten 6 Monate berechnen
+  const months = []
+  for (let i = 5; i >= 0; i--) {
+    const monthIndex = (currentMonth - i + 12) % 12
+    const year = currentMonth - i < 0 ? currentYear - 1 : currentYear
+    months.push({ monthIndex, year, name: monthNames[monthIndex] })
+  }
+  
+  return months.map(({ monthIndex, year, name }) => {
+    // Workouts für diesen Monat filtern
+    const monthWorkouts = props.workouts.filter(w => {
+      const workoutDate = w.createdAt && typeof w.createdAt.toDate === 'function' 
+        ? w.createdAt.toDate() 
+        : new Date(w.date)
+      return workoutDate.getFullYear() === year && workoutDate.getMonth() === monthIndex
+    })
+    
+    const workouts = monthWorkouts.length
+    const duration = monthWorkouts.reduce((sum, w) => sum + Number(w.duration), 0)
+    
+    // Fortschritt basierend auf einem Ziel von 20 Workouts pro Monat
+    const monthlyGoal = 20
+    const progress = Math.min(100, (workouts / monthlyGoal) * 100)
     
     return {
-      name: month,
-      year: currentYear,
+      name,
+      year,
       workouts,
       duration,
       progress: Math.round(progress)
